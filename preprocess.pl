@@ -37,6 +37,11 @@ sub main {
 				$ls =~ s/$n2/$id/;
 			}
 		}
+		if ($ls =~ /CREATE INDEX ON :/) {
+			$ls =~ s/CREATE INDEX ON :/CREATE PROPERTY INDEX ON /;
+			$ls =~ s/'//g;
+		}
+
 		$ls =~ s/\s*$//;
 		printf("%s\n", $ls);
 	}
