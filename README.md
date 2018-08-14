@@ -23,6 +23,10 @@ $ unzip neo4j-shell-tools.zip -d lib
 ```
 
 4. Download the preprocess.pl for preprocessing the Cypher statements.
+```sh
+$ git clone https://github.com/ykhwong/neo4j_to_agensgraph.git
+$ ls neo4j_to_agensgraph/preprocess.pl
+```
 
 ## EXPORT CYPHER
 
