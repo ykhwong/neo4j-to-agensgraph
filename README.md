@@ -30,7 +30,7 @@ $ ls neo4j_to_agensgraph/preprocess.pl
 
 ## EXPORT CYPHER
 
-1. Run the cypher-shell and type the following.
+1. Run the neo4j-shell and type the following.
 
 ```
 export-cypher -o export.cypher
