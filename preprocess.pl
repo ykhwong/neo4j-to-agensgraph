@@ -88,6 +88,7 @@ sub main {
 	my $graph_name;
 	my $file;
 	my $graph_st;
+	my $opt;
 	foreach my $arg (@ARGV) {
 		if ($arg =~ /^--import-to-agens$/) {
 			$use_agens=1;
@@ -97,8 +98,24 @@ sub main {
 			$graph_name=$1;
 			next;
 		}
+		if ($arg =~ /^(--dbname=\S+)$/) {
+			$opt.=" " . $1;
+			next;
+		}
+		if ($arg =~ /^(--host=\S+)$/) {
+			$opt.=" " . $1;
+			next;
+		}
+		if ($arg =~ /^(--port=\S+)$/) {
+			$opt.=" " . $1;
+			next;
+		}
 		if ($arg =~ /^--/ || $arg =~ /^--(h|help)$/) {
 			printf("USAGE: perl $0 [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]\n");
+			printf("   Additional optional parameters for the AgensGraph integration:\n");
+			printf("      --dbname= : Database name\n");
+			printf("      --host=   : Hostname or IP\n");
+			printf("      --port=   : Port\n");
 			exit 0;
 		}
 		$file=$arg;
@@ -110,7 +127,7 @@ sub main {
 	}
 
 	if ($use_agens) {
-		$pid = open2 $out, $in, "agens";
+		$pid = open2 $out, $in, "agens $opt";
 		die "$0: open2: $!" unless defined $pid;
 	}
 
