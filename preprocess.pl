@@ -10,7 +10,7 @@ sub main {
 		$ls =~ s/'/''/g;
 		$ls =~ s/\\"([\},])/\\\\'$1/g;
 		$ls =~ s/([^\\])(`|")/$1'/g;
-		$ls =~ s/\\"/"$1/g;
+		$ls =~ s/\\"/"/g;
 		$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
 		$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
 
