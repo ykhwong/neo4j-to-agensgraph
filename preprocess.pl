@@ -8,9 +8,9 @@ sub main {
 
 		# Basic change
 		$ls =~ s/'/''/g;
+		$ls =~ s/\\"([\},])/\\\\'$1/g;
 		$ls =~ s/([^\\])(`|")/$1'/g;
-		$ls =~ s/\\"/"/g;
-		$ls =~ s/'"/'\\'/g;
+		$ls =~ s/\\"/"$1/g;
 		$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
 		$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
 
