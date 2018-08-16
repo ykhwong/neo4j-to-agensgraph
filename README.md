@@ -33,6 +33,7 @@ Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
 ```
 
 ## EXPORT CYPHER
+### FOR THE SMALL DATA SET
 1. Run the neo4j-shell and type the following command.
 
 ```
@@ -76,7 +77,7 @@ The contents of the file would be something like this:
 
 2. Run the below command to begin the preprocess.
 ```sh
-  $ perl preprocess.pl export.cypher
+  $ perl preprocess.pl export.cypher --graph=TEMP
 ```
 
 You’ll see the preprocessed output which can be used for AgensGraph.
@@ -110,7 +111,7 @@ You’ll see the preprocessed output which can be used for AgensGraph.
 
 If you want to import the preprocessed result to AgensGraph, please type the following.
 ```sh
-  $ (echo "DROP GRAPH IF EXISTS TEMP CASCADE; CREATE GRAPH TEMP; SET GRAPH_PATH=TEMP;";perl preprocess.pl export.cypher) | agens
+  $ perl preprocess.pl export.cypher --graph=TEMP --import-to-agens
 ```
 
 Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the path name above.
@@ -146,6 +147,25 @@ The following message will be displayed on success.
   BEGIN
   COMMIT
 ```
+
+### FOR THE BIG DATA SET
+1. Run the neo4j-shell and type the following command.
+
+```
+  neo4j-sh (?)$ export-cypher -o export.cypher
+```
+
+It may take long time to generate the export.cypher depending on the data size.
+
+2. During the export, open a new terminal session and type the following to import the the data to AgensGraph.
+
+```sh
+  $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
+```
+
+Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the path name above.
+
+3. Please keep watching the export status from Neo4j.
 
 ## SEE ALSO
 * https://neo4j.com/developer/kb/export-sub-graph-to-cypher-and-import/
