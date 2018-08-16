@@ -170,10 +170,13 @@ Please note that the existing graph repository called TEMP will be removed and i
 ## DETAILED USAGE
 ```
 USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]
-   Additional optional parameters when --import-to-agens is provided:
-      --dbname= : Database name
-      --host=   : Hostname or IP
-      --port=   : Port
+   Additional optional parameters for the AgensGraph integration:
+      [--dbname=DBNAME] : Database name
+      [--host=HOST]     : Hostname or IP
+      [--port=PORT]     : Port
+      [--username=USER] : Username
+      [--no-password]   : No password
+      [--password]      : Ask password (should happen automatically)
 ```
 
 ## SEE ALSO
