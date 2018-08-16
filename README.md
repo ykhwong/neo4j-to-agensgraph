@@ -82,6 +82,9 @@ The contents of the file would be something like this:
 
 You’ll see the preprocessed output which can be used for AgensGraph.
 ```
+  DROP GRAPH IF EXISTS TEMP CASCADE;
+  CREATE GRAPH TEMP;
+  SET GRAPH_PATH=TEMP;
   BEGIN;
   CREATE (:person {'name':'Billy'});
   CREATE (:person {'name':'Jim'});
