@@ -98,24 +98,23 @@ sub main {
 			$graph_name=$1;
 			next;
 		}
-		if ($arg =~ /^(--dbname=\S+)$/) {
-			$opt.=" " . $1;
+		if ($arg =~ /^(--)(dbname|host|port|username)(=\S+)$/) {
+			$opt.=" " . $1 . $2 . $3;
 			next;
 		}
-		if ($arg =~ /^(--host=\S+)$/) {
-			$opt.=" " . $1;
-			next;
-		}
-		if ($arg =~ /^(--port=\S+)$/) {
-			$opt.=" " . $1;
+		if ($arg =~ /^(--)(no-password|password)$/) {
+			$opt.=" " . $1 . $2;
 			next;
 		}
 		if ($arg =~ /^--/ || $arg =~ /^--(h|help)$/) {
 			printf("USAGE: perl $0 [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]\n");
 			printf("   Additional optional parameters for the AgensGraph integration:\n");
-			printf("      --dbname= : Database name\n");
-			printf("      --host=   : Hostname or IP\n");
-			printf("      --port=   : Port\n");
+			printf("      [--dbname=DBNAME] : Database name\n");
+			printf("      [--host=HOST]     : Hostname or IP\n");
+			printf("      [--port=PORT]     : Port\n");
+			printf("      [--username=USER] : Username\n");
+			printf("      [--no-password]   : No password\n");
+			printf("      [--password]      : Ask password (should happen automatically)\n");
 			exit 0;
 		}
 		$file=$arg;
