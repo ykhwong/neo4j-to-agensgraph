@@ -4,8 +4,12 @@
 ## INTRODUCTION
 Preprocesses the Cypher statements from Neo4j so that they can be used for AgensGraph. This can be useful for the migration.
 
+## REQUIREMENT
+* Neo4j as a source database server
+* AgensGraph as a target database server
+
 ## SETUP
-The following setup is required on the Neo4j server.
+The following setup is required for the Neo4j server.
 
 1. Install the APOC library ( https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases ).
 Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
@@ -15,9 +19,9 @@ Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
   apoc.export.file.enabled=true
 ```
 
-3. Install ‘neo4j-shell tools’.
+3. Install 'neo4j-shell tools'.
 ```sh
-  $ cd /path/to/neo4j-community-3.0.1
+  $ cd /path/to/neo4j-community-3.4.5
   $ curl http://dist.neo4j.org/jexp/shell/neo4j-shell-tools_3.0.1.zip -o neo4j-shell-tools.zip
   $ unzip neo4j-shell-tools.zip -d lib
 ```
@@ -29,14 +33,13 @@ Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
 ```
 
 ## EXPORT CYPHER
-
-1. Run the neo4j-shell and type the following.
+1. Run the neo4j-shell and type the following command.
 
 ```
-  export-cypher -o export.cypher
+  neo4j-sh (?)$ export-cypher -o export.cypher
 ```
 
-export.cypher will be created on the neo4j directory.
+export.cypher will be created in the neo4j directory.
 The contents of the file would be something like this:
 
 ```
@@ -71,9 +74,9 @@ The contents of the file would be something like this:
   COMMIT
 ```
 
-2. Run the below command.
+2. Run the below command to begin the preprocess.
 ```sh
-  $ cat export.cypher | perl preprocess.pl
+  $ perl preprocess.pl export.cypher
 ```
 
 You’ll see the preprocessed output which can be used for AgensGraph.
@@ -107,10 +110,10 @@ You’ll see the preprocessed output which can be used for AgensGraph.
 
 If you want to import the preprocessed result to AgensGraph, please type the following.
 ```sh
-  $ (echo "DROP GRAPH IF EXISTS TEMP CASCADE; CREATE GRAPH TEMP; SET GRAPH_PATH=TEMP;"&&cat export.cypher | perl preprocess.pl) | agens
+  $ (echo "DROP GRAPH IF EXISTS TEMP CASCADE; CREATE GRAPH TEMP; SET GRAPH_PATH=TEMP;";perl preprocess.pl export.cypher) | agens
 ```
 
-Here, please note that the GRAPH_PATH will be set to TEMP. You can change the path depending on preference.
+Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the path name above.
 
 The following message will be displayed on success.
 ```
