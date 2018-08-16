@@ -167,5 +167,14 @@ Please note that the existing graph repository called TEMP will be removed and i
 
 3. Please keep watching the export status from Neo4j.
 
+## DETAILED USAGE
+```
+USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]
+   Additional optional parameters when --import-to-agens is provided:
+      --dbname= : Database name
+      --host=   : Hostname or IP
+      --port=   : Port
+```
+
 ## SEE ALSO
 * https://neo4j.com/developer/kb/export-sub-graph-to-cypher-and-import/
