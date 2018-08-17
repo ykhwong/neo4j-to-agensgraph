@@ -158,6 +158,7 @@ def main():
 		#ipc.stdin.close()
 		#print ipc.stdout.read()
 		print "Integration with AgensGraph is currently not supported"
+		exit 1
 	else:
 		print graph_st
 
