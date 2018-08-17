@@ -104,6 +104,7 @@ def out(ls):
 		#ipc.stdin.write(line + "\n")
 		#ipc.stdin.close()
 		#print ipc.stdout.read()
+		pass
 	else:
 		print line,
 
@@ -158,7 +159,7 @@ def main():
 		#ipc.stdin.close()
 		#print ipc.stdout.read()
 		print "Integration with AgensGraph is currently not supported"
-		exit 1
+		exit(1)
 	else:
 		print graph_st
 
