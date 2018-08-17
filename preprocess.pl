@@ -48,7 +48,7 @@ sub proc {
 		}
 	}
 	if ($ls =~ /^CREATE +\(:'(\S+)'/i) {
-		$ls =~ s/^CREATE +\(:'(\S+)'/CREATE +(:$1/i;
+		$ls =~ s/^CREATE +\(:'(\S+)'/CREATE (:$1/i;
 	}
 	if ($ls =~ /^CREATE +INDEX +ON +:/i) {
 		$ls =~ s/^CREATE +INDEX +ON +:/CREATE PROPERTY INDEX ON /i;
