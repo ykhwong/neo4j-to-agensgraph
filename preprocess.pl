@@ -3,6 +3,8 @@ use IPC::Open2;
 my %unique_import_id;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
+my ($pid, $out, $in);
+my $use_agens=0;
 
 sub proc {
 	my $ls = shift;
@@ -79,12 +81,25 @@ sub load_file {
 
 sub make_graph_st {
 	my $graph_name = shift;
-	return "DROP GRAPH IF EXISTS $graph_name CASCADE;\nCREATE GRAPH $graph_name;\nSET GRAPH_PATH=$graph_name;\n";
+	return "DROP GRAPH IF EXISTS $graph_name CASCADE;\nCREATE GRAPH $graph_name;\nSET GRAPH_PATH=$graph_name;";
+}
+
+sub out {
+	my $ls = shift;
+	my $line;
+	return if ($ls =~ /^\s*$/);
+	$line = proc($ls);
+	return if ($line =~ /^\s*$/);
+	if ($use_agens) {
+		print $in "$line\n";
+		my $msg = <$out>;
+		print $msg;
+	} else {
+		printf("%s\n", $line);
+	}
 }
 
 sub main {
-	my ($pid, $out, $in);
-	my $use_agens=0;
 	my $graph_name;
 	my $file;
 	my $graph_st;
@@ -125,59 +140,29 @@ sub main {
 		exit 1;
 	}
 
-	if ($use_agens) {
-		$pid = open2 $out, $in, "agens $opt";
-		die "$0: open2: $!" unless defined $pid;
-	}
-
 	if ($file) {
 		if ( ! -f $file ) {
 			printf("File not found: %s\n", $file);
 			exit 1;
 		}
-		$graph_st = make_graph_st($graph_name);
-		if ($use_agens) {
-			print $in $graph_st;
-			my $msg = <$out>;
-			print $msg;
-		} else {
-			printf("%s", $graph_st);
-		}
+	}
+	$graph_st = make_graph_st($graph_name);
+	if ($use_agens) {
+		$pid = open2 $out, $in, "agens $opt";
+		die "$0: open2: $!" unless defined $pid;
+		print $in $graph_st . "\n";
+		my $msg = <$out>;
+		print $msg;
+	} else {
+		printf("%s\n", $graph_st);
+	}
+	if ($file) {
 		foreach my $ls (split /\n/, load_file($file)) {
-			my $line;
-			next if ($ls =~ /^\s*$/);
-			$line = proc($ls);
-			next if ($line =~ /^\s*$/);
-			if ($use_agens) {
-				print $in "$line\n";
-				my $msg = <$out>;
-				print $msg;
-			} else {
-				printf("%s\n", $line);
-			}
+			out($ls);
 		}
 	} else {
-		$graph_st = make_graph_st($graph_name);
-		if ($use_agens) {
-			print $in $graph_st;
-			my $msg = <$out>;
-			print $msg;
-		} else {
-			printf("%s", $graph_st);
-		}
 		while (<STDIN>) {
-			my ($ls, $line);
-			$ls = $_;
-			next if ($ls =~ /^\s*$/);
-			$line = proc($ls);
-			next if ($line =~ /^\s*$/);
-			if ($use_agens) {
-				print $in "$line\n";
-				my $msg = <$out>;
-				print $msg;
-			} else {
-				printf("%s\n", $line);
-			}
+			out($_);
 		}
 	}
 	if ($use_agens) {
