@@ -171,8 +171,9 @@ def main():
 		for ls in sys.stdin:
 			out(ls)
 	if use_agens:
-		ipc.terminate()
-		ipc.kill()
+		#ipc.terminate()
+		#ipc.kill()
+		pass
 
 main()
 
