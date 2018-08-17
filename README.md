@@ -117,7 +117,7 @@ If you want to import the preprocessed result to AgensGraph, please type the fol
   $ perl preprocess.pl export.cypher --graph=TEMP --import-to-agens
 ```
 
-Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the path name above.
+Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
 
 The following message will be displayed on success.
 ```
@@ -166,11 +166,15 @@ It may take long time to generate the export.cypher depending on the data size.
   $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
 ```
 
-Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the path name above.
+Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
 
 3. Please keep watching the export status from Neo4j.
 
-## DETAILED USAGE
+## TECHNIAL DETAILS
+* '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including verticies and edges must be stored in the repository.
+* '--import-to-agens' depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
+
+### USAGE
 ```
 USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]
    Additional optional parameters for the AgensGraph integration:
