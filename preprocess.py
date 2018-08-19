@@ -153,7 +153,7 @@ def main():
 	graph_st=make_graph_st(graph_name)
 	if use_agens:
 		global ipc
-		ipc = Popen(['agens', opt], shell=True, stdin=PIPE, stderr=STDOUT)
+		ipc = Popen(['agens', opt], stdin=PIPE, stderr=STDOUT)
 		graph_st = re.sub("$", "\n", graph_st)
 		ipc.stdin.write(graph_st.encode())
 	else:
