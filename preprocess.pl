@@ -42,7 +42,7 @@ sub proc {
 		}
 		if ($n2 =~ /(\d+)/) {
 			my $id = $unique_import_id{$1};
-			$id =~ s/\t/{/;
+			$id =~ s/\t/ {/;
 			$id .= '}';
 			$ls =~ s/$n2/$id/i;
 		}
