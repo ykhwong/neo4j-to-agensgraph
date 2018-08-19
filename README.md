@@ -97,14 +97,14 @@ You’ll see the preprocessed output which can be used for AgensGraph.
   BEGIN;
   COMMIT;
   BEGIN;
-  MATCH (n1:person {'name':'Jim'}), (n2:person{'name':'Billy'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Jim'}), (n2:person{'name':'Mike'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Anna'}), (n2:person{'name':'Jim'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Anna'}), (n2:person{'name':'Mike'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Sally'}), (n2:person{'name':'Anna'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Joe'}), (n2:person{'name':'Sally'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Joe'}), (n2:person{'name':'Bob'}) CREATE (n1)-[r:KNOWS]->(n2);
-  MATCH (n1:person {'name':'Bob'}), (n2:person{'name':'Sally'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Jim'}), (n2:person {'name':'Billy'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Jim'}), (n2:person {'name':'Mike'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Anna'}), (n2:person {'name':'Jim'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Anna'}), (n2:person {'name':'Mike'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Sally'}), (n2:person {'name':'Anna'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Joe'}), (n2:person {'name':'Sally'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Joe'}), (n2:person {'name':'Bob'}) CREATE (n1)-[r:KNOWS]->(n2);
+  MATCH (n1:person {'name':'Bob'}), (n2:person {'name':'Sally'}) CREATE (n1)-[r:KNOWS]->(n2);
   COMMIT;
   BEGIN;
   COMMIT;
@@ -171,7 +171,7 @@ Please note that the existing graph repository called TEMP will be removed and i
 3. Please keep watching the export status from Neo4j.
 
 ## TECHNIAL DETAILS
-* '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including verticies and edges must be stored in the repository.
+* '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
 * '--import-to-agens' depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
 
 ### USAGE
