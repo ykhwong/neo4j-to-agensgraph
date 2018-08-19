@@ -7,6 +7,7 @@ Preprocesses the Cypher statements from Neo4j so that they can be used for Agens
 ## REQUIREMENT
 * Neo4j as a source database server
 * AgensGraph as a target database server
+* Either one of the following: Perl 5 or Python 2 or Python 3
 
 ## SETUP
 The following setup is required for the Neo4j server.
@@ -26,10 +27,10 @@ Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
   $ unzip neo4j-shell-tools.zip -d lib
 ```
 
-4. Download the preprocess.pl for preprocessing the Cypher statements.
+4. Download the preprocessor file for preprocessing the Cypher statements.
 ```sh
   $ git clone https://github.com/ykhwong/neo4j_to_agensgraph.git
-  $ ls neo4j_to_agensgraph/preprocess.pl
+  $ cd neo4j_to_agensgraph
 ```
 
 ## EXPORT CYPHER
@@ -80,6 +81,11 @@ The contents of the file would be something like this:
   $ perl preprocess.pl export.cypher --graph=TEMP
 ```
 
+Or you can use the python interpreter instead.
+```sh
+  $ python preprocess.py export.cypher --graph=TEMP
+```
+
 You’ll see the preprocessed output which can be used for AgensGraph.
 ```
   DROP GRAPH IF EXISTS TEMP CASCADE;
@@ -115,6 +121,11 @@ You’ll see the preprocessed output which can be used for AgensGraph.
 If you want to import the preprocessed result to AgensGraph, please type the following.
 ```sh
   $ perl preprocess.pl export.cypher --graph=TEMP --import-to-agens
+```
+
+Or you can use the python interpreter instead.
+```sh
+  $ python preprocess.py export.cypher --graph=TEMP --import-to-agens
 ```
 
 Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
@@ -166,13 +177,19 @@ It may take long time to generate the export.cypher depending on the data size.
   $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
 ```
 
+Or you can use the python interpreter instead.
+```sh
+  $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens
+```
+
 Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
 
 3. Please keep watching the export status from Neo4j.
 
 ## TECHNIAL DETAILS
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
-* '--import-to-agens' depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
+* '--import-to-agens' option depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
+* Originally written in Perl, and subsequently ported to Python.
 
 ### USAGE
 ```
