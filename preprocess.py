@@ -1,7 +1,7 @@
 import sys
 import re
 import os.path
-#from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT
 
 unique_import_id={}
 UIL="'UNIQUE +IMPORT +LABEL'"
@@ -101,11 +101,9 @@ def out(ls):
 		return
 	line=re.sub("(\r|\n)", "", line)
 	if use_agens:
-		#global ipc
-		#ipc.stdin.write(line + "\n")
-		#ipc.stdin.close()
-		#print ipc.stdout.read()
-		pass
+		global ipc
+		line = re.sub("$", "\n", line)
+		ipc.stdin.write(line.encode())
 	else:
 		print(line)
 
@@ -154,13 +152,10 @@ def main():
 			exit(1)
 	graph_st=make_graph_st(graph_name)
 	if use_agens:
-		#global ipc
-		#ipc = Popen(['agens', opt], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-		#ipc.stdin.write(graph_st + "\n")
-		#ipc.stdin.close()
-		#print ipc.stdout.read()
-		print("Integration with AgensGraph is currently not supported")
-		exit(1)
+		global ipc
+		ipc = Popen(['agens', opt], shell=True, stdin=PIPE, stderr=STDOUT)
+		graph_st = re.sub("$", "\n", graph_st)
+		ipc.stdin.write(graph_st.encode())
 	else:
 		print(graph_st)
 
@@ -172,9 +167,7 @@ def main():
 		for ls in sys.stdin:
 			out(ls)
 	if use_agens:
-		#ipc.terminate()
-		#ipc.kill()
-		pass
+		ipc.stdin.close()
 
 main()
 
