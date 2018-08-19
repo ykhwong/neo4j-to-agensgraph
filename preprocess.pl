@@ -148,6 +148,11 @@ sub main {
 	}
 	$graph_st = make_graph_st($graph_name);
 	if ($use_agens) {
+		`agens --help`;
+		if ($? ne 0) {
+			printf("agens client is not available.\n");
+			exit 1;
+		}
 		$pid = open2 $out, $in, "agens $opt";
 		die "$0: open2: $!" unless defined $pid;
 		print $in $graph_st . "\n";

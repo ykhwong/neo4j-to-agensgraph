@@ -153,6 +153,17 @@ def main():
 	graph_st=make_graph_st(graph_name)
 	if use_agens:
 		global ipc
+		ret = ""
+		not_avail = "agens client is not available"
+		try:
+			ret = Popen(['agens', '--help'], stdin=None, stdout=PIPE, stderr=STDOUT)
+		except OSError:
+			print(not_avail)
+			exit(1)
+		ret.wait()
+		if ret.returncode != 0:
+			print(not_avail)
+			exit(1)
 		ipc = Popen(['agens', opt], stdin=PIPE, stderr=STDOUT)
 		graph_st = re.sub("$", "\n", graph_st)
 		ipc.stdin.write(graph_st.encode())
