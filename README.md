@@ -187,9 +187,10 @@ Please note that the existing graph repository called TEMP will be removed and i
 3. Please keep watching the export status from Neo4j.
 
 ## TECHNIAL DETAILS
+* Originally written in Perl, and subsequently ported to Python.
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
 * '--import-to-agens' option depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
-* Originally written in Perl, and subsequently ported to Python.
+* Multiple labels from Neo4j are automatically treated as the label inheritances in AgensGraph due to the architectural differences between the two databases. The parent vertex labels that start with "AG_MULV_(number)" will be created in the target side.
 
 ### USAGE
 ```
