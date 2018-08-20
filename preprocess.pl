@@ -5,7 +5,18 @@ my %multiple_vlabels;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
 my ($pid, $out, $in);
+my $multiple_vlabel_cnt=0;
 my $use_agens=0;
+my $mulv_label_name="AG_MULV_";
+
+sub set_multiple_vlabel {
+	my ($vertexes, $property) = @_;
+	my $top_vertex = $mulv_label_name;
+	$multiple_vlabel_cnt++;
+	$top_vertex .= $multiple_vlabel_cnt;
+	$multiple_vlabels{$vertexes} = $top_vertex . "\t" . $property;
+	return $top_vertex;
+}
 
 sub proc {
 	my $ls = shift;
@@ -24,9 +35,10 @@ sub proc {
 		my $vlabel = $1;
 		my $id = $2;
 		if ($vlabel =~ /':'/) {
-			#foreach my $item (split /':'/, $vlabel) {}
-			printf("-- Multiple labels are not supported\n");
-			exit 1;
+			$vlabel =~ s/':'/:/g;
+			$vlabel = set_multiple_vlabel($vlabel, "");
+			$unique_import_id{$id} = "$vlabel\t";
+			return "";
 		}
 		$unique_import_id{$id} = "$vlabel\t";
 		$ls =~ s/:$UIL +.+/);/;
@@ -37,13 +49,40 @@ sub proc {
 		my $keyval = $2;
 		my $id = $3;
 		if ($vlabel =~ /':'/) {
-			#foreach my $item (split /':'/, $vlabel) {}
-			printf("-- Multiple labels are not supported\n");
-			exit 1;
+			$vlabel =~ s/':'/:/g;
+			$vlabel = set_multiple_vlabel($vlabel, $keyval);
+			$unique_import_id{$id} = $vlabel . "\t" . $keyval;
+			return "";
 		}
 		$unique_import_id{$id} = $vlabel . "\t" . $keyval;
 		$ls =~ s/CREATE +\(:'(\S+)':$UIL +\{/CREATE (:$1 {/i;
 		$ls =~ s/, +$UII:\d+\}/\}/i;
+	}
+
+	if ($ls =~ /^COMMIT/i && %multiple_vlabels) {
+		$ls .= "\nBEGIN;\n";
+		foreach my $cnt (1..$multiple_vlabel_cnt) {
+			$ls .= "CREATE VLABEL $mulv_label_name" . $cnt . ";\n";
+		}
+		foreach my $key (sort keys %multiple_vlabels) {
+			my $val = $multiple_vlabels{$key};
+			my ($val1, $property) = (split /\t/, $val);
+			my $prev;
+			foreach my $vlabel (sort split /:/, $key) {
+				$ls .= "CREATE VLABEL $vlabel INHERITS ($val1);\n";
+			}
+			foreach my $vlabel (sort split /:/, $key) {
+				if ($property =~ /\S/) {
+					$ls .= "CREATE (:$vlabel { $property });\n";
+				} else {
+					#if ($prev ne $vlabel) {
+					#	$ls .= "CREATE VLABEL $vlabel;\n";
+					#}
+				}
+			}
+		}
+		$ls .= "COMMIT;\n";
+		undef %multiple_vlabels;
 	}
 
 	if ($ls =~ /^MATCH +\(n1:$UIL(\{$UII:\d+\})\), +\(n2:$UIL(\{$UII:\d+\})\)/i) {
@@ -110,8 +149,9 @@ sub out {
 	$line = proc($ls);
 	return if ($line =~ /^\s*$/);
 	if ($use_agens) {
+		my $msg;
 		print $in "$line\n";
-		my $msg = <$out>;
+		$msg = <$out>;
 		print $msg;
 	} else {
 		printf("%s\n", $line);

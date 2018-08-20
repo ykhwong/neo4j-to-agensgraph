@@ -4,12 +4,24 @@ import os.path
 from subprocess import Popen, PIPE, STDOUT
 
 unique_import_id={}
+multiple_vlabels={}
 UIL="'UNIQUE +IMPORT +LABEL'"
 UII="'UNIQUE +IMPORT +ID'"
-use_agens=False
 ipc=""
+multiple_vlabel_cnt=0
+use_agens=False
+mulv_label_name="AG_MULV_"
+
+def set_multiple_vlabel(vertexes, s_property):
+	global multiple_vlabel_cnt, multiple_vlabels
+	top_vertex="AG_MULV_";
+	multiple_vlabel_cnt=multiple_vlabel_cnt + 1
+	top_vertex = top_vertex + str(multiple_vlabel_cnt)
+	multiple_vlabels[vertexes] = top_vertex + "\t" + s_property
+	return top_vertex
 
 def proc(ls):
+	global multiple_vlabels
 	if re.search('^SCHEMA +AWAIT', ls, flags=re.IGNORECASE):
 		return ""
 
@@ -32,8 +44,10 @@ def proc(ls):
 		vlabel = m1.group(1)
 		s_id = m1.group(2)
 		if re.search("':'", vlabel):
-                        print("-- Multiple labels are not supported");
-                        exit(1)
+			vlabel = re.sub("':'", ":", vlabel)
+			vlabel = set_multiple_vlabel(vlabel, "")
+			unique_import_id[s_id] = vlabel + "\t"
+			return ""
 		unique_import_id[s_id] = vlabel + "\t"
 		ls = re.sub(r":" + UIL + " +.+", ");", ls)
 
@@ -44,14 +58,39 @@ def proc(ls):
 		keyval = m1.group(2)
 		s_id = m1.group(3)
 		if re.search("':'", vlabel):
-                        print("-- Multiple labels are not supported");
-                        exit(1)
+			vlabel = re.sub("':'", ":", vlabel)
+			vlabel = set_multiple_vlabel(vlabel, keyval)
+			unique_import_id[s_id] = vlabel + "\t" + keyval
+			return ""
 		unique_import_id[s_id] = vlabel + "\t" + keyval
 		ls = re.sub(r"^CREATE +\(:'(\S+)':" + UIL + r" +\{", 'CREATE (:' + vlabel + ' {', ls, flags=re.IGNORECASE) 
 		ls = re.sub(r", +" + UII + r":\d+\}", "}", ls)
 
+	if (re.search(r"^COMMIT", ls, re.IGNORECASE) and multiple_vlabels):
+		if not re.search("(\r|\n)$", ls):
+			ls = ls + "\n"
+		ls = ls + "BEGIN;\n"
+		for cnt in range(1,multiple_vlabel_cnt+1):
+			ls += "CREATE VLABEL " + mulv_label_name + str(cnt) + ";\n"
+
+		for key in multiple_vlabels:
+			val = multiple_vlabels.get(key)
+			val1, s_property = val.split("\t")
+			prev=""
+			for vlabel in key.split(":"):
+				ls = ls + "CREATE VLABEL " + vlabel + " INHERITS (" + val1 + ");\n"
+			for vlabel in key.split(":"):
+				if re.search("\S", s_property):
+					ls = ls + "CREATE (:" + vlabel + " { " + s_property + " });\n"
+				else:
+					pass
+					#if prev != vlabel:
+					#	ls = ls + "CREATE VLABEL " + vlabel + ";\n"
+		ls = ls + "COMMIT;\n"
+		multiple_vlabels = {}
+
 	st = r"^(?i)MATCH +\(n1:" + UIL + r"(\{" + UII + ":\d+\})\), +\(n2:" + UIL + "({" + UII + ":\d+\})\)"
-	m1 = re.search(st, ls)
+	m1 = re.search(st, ls, re.IGNORECASE)
 	if m1:
 		n1 = m1.group(1)
 		n2 = m1.group(2)
@@ -114,7 +153,7 @@ def out(ls):
 	m1 = re.search(r'^\s*$', line)
 	if line == "" or m1:
 		return
-	line=re.sub("(\r|\n)", "", line)
+	line=re.sub("(\r|\n)+$", "", line)
 	if use_agens:
 		global ipc
 		line = re.sub("$", "\n", line)
