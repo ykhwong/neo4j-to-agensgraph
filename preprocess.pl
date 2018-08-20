@@ -20,6 +20,13 @@ sub proc {
 	$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
 	$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
 
+	if ($ls =~ /CREATE +\(:(\S+):$UIL +\{$UII:(\d+)\}\);/i) {
+		my $vlabel = $1;
+		my $id = $2;
+		$unique_import_id{$id} = "$vlabel\t";
+		$ls =~ s/:$UIL +.+/);/;
+	}
+
 	if ($ls =~ /CREATE +\(:'(\S+)':$UIL +\{(.+), $UII:(\d+)\}\);/i) {
 		my $vlabel = $1;
 		my $keyval = $2;
@@ -28,6 +35,7 @@ sub proc {
 		$ls =~ s/CREATE +\(:'(\S+)':$UIL +\{/CREATE (:$1 {/i;
 		$ls =~ s/, +$UII:\d+\}/\}/i;
 	}
+
 	if ($ls =~ /^MATCH +\(n1:$UIL(\{$UII:\d+\})\), +\(n2:$UIL(\{$UII:\d+\})\)/i) {
 		my $n1 = $1;
 		my $n2 = $2;
