@@ -1,6 +1,7 @@
 use strict;
 use IPC::Open2;
 my %unique_import_id;
+my %multiple_vlabels;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
 my ($pid, $out, $in);
@@ -12,7 +13,6 @@ sub proc {
 	return "" if ($ls =~ /^(CREATE|DROP) +CONSTRAINT .+UNIQUE +IMPORT/i);
 	return "" if ($ls =~ /^MATCH .+ REMOVE .+/i);
 
-	# Basic change
 	$ls =~ s/'/''/g;
 	$ls =~ s/\\"([\},])/\\\\'$1/g;
 	$ls =~ s/([^\\])(`|")/$1'/g;
@@ -23,6 +23,11 @@ sub proc {
 	if ($ls =~ /CREATE +\(:'(\S+)':$UIL +\{$UII:(\d+)\}\);/i) {
 		my $vlabel = $1;
 		my $id = $2;
+		if ($vlabel =~ /':'/) {
+			#foreach my $item (split /':'/, $vlabel) {}
+			printf("-- Multiple labels are not supported\n");
+			exit 1;
+		}
 		$unique_import_id{$id} = "$vlabel\t";
 		$ls =~ s/:$UIL +.+/);/;
 	}
@@ -31,6 +36,11 @@ sub proc {
 		my $vlabel = $1;
 		my $keyval = $2;
 		my $id = $3;
+		if ($vlabel =~ /':'/) {
+			#foreach my $item (split /':'/, $vlabel) {}
+			printf("-- Multiple labels are not supported\n");
+			exit 1;
+		}
 		$unique_import_id{$id} = $vlabel . "\t" . $keyval;
 		$ls =~ s/CREATE +\(:'(\S+)':$UIL +\{/CREATE (:$1 {/i;
 		$ls =~ s/, +$UII:\d+\}/\}/i;
@@ -78,7 +88,7 @@ sub proc {
 sub load_file {
 	my $filename = shift;
 	unless ( -f $filename ) {
-		print STDERR "File not found: $filename\n";
+		printf("File not found: $filename\n");
 		exit 1;
 	}
 	open my $in, '<:raw', $filename or die("Check the file: $filename\n");

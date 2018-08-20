@@ -31,6 +31,9 @@ def proc(ls):
 	if m1:
 		vlabel = m1.group(1)
 		s_id = m1.group(2)
+		if re.search("':'", vlabel):
+                        print("-- Multiple labels are not supported");
+                        exit(1)
 		unique_import_id[s_id] = vlabel + "\t"
 		ls = re.sub(r":" + UIL + " +.+", ");", ls)
 
@@ -40,6 +43,9 @@ def proc(ls):
 		vlabel = m1.group(1)
 		keyval = m1.group(2)
 		s_id = m1.group(3)
+		if re.search("':'", vlabel):
+                        print("-- Multiple labels are not supported");
+                        exit(1)
 		unique_import_id[s_id] = vlabel + "\t" + keyval
 		ls = re.sub(r"^CREATE +\(:'(\S+)':" + UIL + r" +\{", 'CREATE (:' + vlabel + ' {', ls, flags=re.IGNORECASE) 
 		ls = re.sub(r", +" + UII + r":\d+\}", "}", ls)
