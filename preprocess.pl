@@ -65,10 +65,11 @@ sub proc {
 	if ($ls =~ /^CREATE +CONSTRAINT +ON +\(\S+:'(\S+)'\) +ASSERT +\S+\.'(\S+)'/i) {
 		$ls =~ s/^CREATE +CONSTRAINT +ON +\(\S+:'(\S+)'\) +ASSERT +\S+\.'(\S+)'/CREATE CONSTRAINT ON $1 ASSERT $2/i;
 	}
-	if ($ls =~ /^MATCH +\(n1:'(\S+)'/i) {
-		$ls =~ s/^MATCH +\(n1:'(\S+)'\s*\{/MATCH (n1:$1 {/i;
-		$ls =~ s/ +\(n2:'(\S+)'\s*\{/ (n2:$1 {/i;
+	if ($ls =~ /^MATCH +\(n1:'*(\S+)'*/i) {
+		$ls =~ s/^MATCH +\(n1:'*(\S+)'*\s*\{/MATCH (n1:$1 {/i;
+		$ls =~ s/ +\(n2:'*(\S+)'*\s*\{/ (n2:$1 {/i;
 		$ls =~ s/\[:'(\S+)'\]/[:$1]/i;
+		$ls =~ s/\[:'(\S+)' /[:$1 /i;
 	}
 	$ls =~ s/\s*$//;
 	return $ls;
