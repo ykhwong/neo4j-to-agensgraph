@@ -20,7 +20,7 @@ sub proc {
 	$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
 	$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
 
-	if ($ls =~ /CREATE +\(:(\S+):$UIL +\{$UII:(\d+)\}\);/i) {
+	if ($ls =~ /CREATE +\(:'(\S+)':$UIL +\{$UII:(\d+)\}\);/i) {
 		my $vlabel = $1;
 		my $id = $2;
 		$unique_import_id{$id} = "$vlabel\t";

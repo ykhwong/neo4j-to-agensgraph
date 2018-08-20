@@ -26,7 +26,7 @@ def proc(ls):
 	ls = re.sub(r'^\s*BEGIN\s*$', r'BEGIN;\n', ls, flags=re.IGNORECASE)
 	ls = re.sub(r'^\s*COMMIT\s*$', r'COMMIT;\n', ls, flags=re.IGNORECASE)
 
-	st = r"CREATE +\(:(\S+):"+UIL+" +\{"+UII+":(\d+)\}\);"
+	st = r"CREATE +\(:'(\S+)':"+UIL+" +\{"+UII+":(\d+)\}\);"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vlabel = m1.group(1)
