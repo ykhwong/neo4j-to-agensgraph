@@ -61,25 +61,29 @@ sub proc {
 
 	if ($ls =~ /^COMMIT/i && %multiple_vlabels) {
 		$ls .= "\nBEGIN;\n";
-		foreach my $cnt (1..$multiple_vlabel_cnt) {
-			$ls .= "CREATE VLABEL $mulv_label_name" . $cnt . ";\n";
-		}
 		foreach my $key (sort keys %multiple_vlabels) {
 			my $val = $multiple_vlabels{$key};
 			my ($val1, $property) = (split /\t/, $val);
 			my $prev;
-			foreach my $vlabel (sort split /:/, $key) {
-				$ls .= "CREATE VLABEL $vlabel INHERITS ($val1);\n";
-			}
+
 			foreach my $vlabel (sort split /:/, $key) {
 				if ($property =~ /\S/) {
 					$ls .= "CREATE (:$vlabel { $property });\n";
 				} else {
-					#if ($prev ne $vlabel) {
-					#	$ls .= "CREATE VLABEL $vlabel;\n";
-					#}
+					if ($prev ne $vlabel) {
+						$ls .= "CREATE VLABEL $vlabel;\n";
+					}
 				}
+				$prev = $vlabel;
 			}
+			$ls .= "CREATE VLABEL $val1 INHERITS (";
+			foreach my $vlabel (sort split /:/, $key) {
+				$ls .= "$vlabel, ";
+			}
+			$ls =~ s/, $//;
+			$ls .= ");\n";
+
+
 		}
 		$ls .= "COMMIT;\n";
 		undef %multiple_vlabels;

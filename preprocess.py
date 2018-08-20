@@ -70,22 +70,25 @@ def proc(ls):
 		if not re.search("(\r|\n)$", ls):
 			ls = ls + "\n"
 		ls = ls + "BEGIN;\n"
-		for cnt in range(1,multiple_vlabel_cnt+1):
-			ls += "CREATE VLABEL " + mulv_label_name + str(cnt) + ";\n"
 
 		for key in multiple_vlabels:
 			val = multiple_vlabels.get(key)
 			val1, s_property = val.split("\t")
 			prev=""
 			for vlabel in key.split(":"):
-				ls = ls + "CREATE VLABEL " + vlabel + " INHERITS (" + val1 + ");\n"
-			for vlabel in key.split(":"):
 				if re.search("\S", s_property):
 					ls = ls + "CREATE (:" + vlabel + " { " + s_property + " });\n"
 				else:
-					pass
-					#if prev != vlabel:
-					#	ls = ls + "CREATE VLABEL " + vlabel + ";\n"
+					if prev != vlabel:
+						ls = ls + "CREATE VLABEL " + vlabel + ";\n"
+				prev = vlabel
+
+			ls = ls + "CREATE VLABEL " + val1 + " INHERITS ("
+			for vlabel in key.split(":"):
+				ls = ls + vlabel + ", "
+			ls = re.sub(r", $", "", ls)
+			ls = ls + ");\n"
+
 		ls = ls + "COMMIT;\n"
 		multiple_vlabels = {}
 
