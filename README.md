@@ -193,11 +193,13 @@ It may take long time to generate the export.cypher depending on the data size.
 2. During the export, open a new terminal session and type the following to import the the data to AgensGraph.
 
 ```sh
+  $ cd /path/to/neo4j-community-3.4.5
   $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
 ```
 
 Or you can use the python interpreter instead.
 ```sh
+  $ cd /path/to/neo4j-community-3.4.5
   $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens
 ```
 
