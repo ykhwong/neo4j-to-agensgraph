@@ -1,5 +1,4 @@
 # DB Migration from Neo4j to AgensGraph
-- Author: Taewoong Yoo
 
 ## INTRODUCTION
 Preprocesses the Cypher statements from Neo4j so that they can be used for AgensGraph. This can be useful for the migration.
@@ -128,7 +127,7 @@ Or you can use the python interpreter instead.
   $ python preprocess.py export.cypher --graph=TEMP --import-to-agens
 ```
 
-Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
+Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
 
 The following message will be displayed on success.
 ```
@@ -182,7 +181,7 @@ Or you can use the python interpreter instead.
   $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens
 ```
 
-Please note that the existing graph repository called TEMP will be removed and initialized. You can freely change the graph name above.
+Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
 
 3. Please keep watching the export status from Neo4j.
 

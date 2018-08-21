@@ -211,7 +211,11 @@ sub main {
 	}
 	$graph_st = make_graph_st($graph_name);
 	if ($use_agens) {
-		`agens --help`;
+		if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'dos') {
+			`agens --help >nul 2>&1`;
+		} else {
+			`agens --help >/dev/null 2>&1`;
+		}
 		if ($? ne 0) {
 			printf("agens client is not available.\n");
 			exit 1;
