@@ -185,10 +185,7 @@ The following message will be displayed on success.
   $ cd /path/to/neo4j-community-3.4.5/bin
   $ neo4j-shell
   neo4j-sh (?)$ export-cypher -o export.cypher
-  Wrote Nodes xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
-  Wrote Relationships xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
-  Wrote to Cypher-file export.cypher xx. 100%: nodes = xx rels = xx properties = xx time 0 ms total xx ms
-  neo4j-sh (?)$ exit
+  ...
 ```
 
 It may take long time to generate the export.cypher depending on the data size.
