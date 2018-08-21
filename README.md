@@ -269,7 +269,7 @@ Counting total edges:
 
 ### NOTE
 The count of edges/vertices may not match if there are multiple vertex-labels on Neo4j.
-Please run this Cypher query statement. If the returned value is bigger than 2, then the source database has the multiple labels.
+Please run this Cypher query statement. If the returned value is bigger than 1, then the source database has the multiple labels.
 ```sh
   $ neo4j-shell
   neo4j-sh (?)$ MATCH (n) RETURN max(length(labels(n)));
