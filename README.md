@@ -7,16 +7,24 @@ Preprocesses the Cypher statements from Neo4j so that they can be used for Agens
 * Neo4j as a source database server
 * AgensGraph as a target database server
 * Either one of the following: Perl 5 or Python 2 or Python 3
+  - For Windows users: Recommended to install Git from https://git-scm.com/downloads and run Git Bash that gives some utilities such as perl, git, and tail by default. MinGW/MSYS and Cygwin are also good alternatives.
 
 ## SETUP
 The following setup is required for the Neo4j server.
 
 1. Install the APOC library ( https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases ).
 Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
-
-2. Add the following line to the conf/neo4j.conf.
+```sh
+  $ cd /path/to/neo4j-community-3.4.5
+  $ if [ ! -d plugins ]; then mkdir plugins; fi
+  $ cd plugins
+  $ wget https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/download/3.4.0.2/apoc-3.4.0.2-all.jar
 ```
-  apoc.export.file.enabled=true
+
+2. Append "apoc.export.file.enabled=true" to the conf/neo4j.conf.
+```sh
+  $ cd /path/to/neo4j-community-3.4.5/conf
+  $ echo "apoc.export.file.enabled=true">>neo4j.conf
 ```
 
 3. Install 'neo4j-shell tools'.
@@ -30,20 +38,29 @@ Copy the library(e.g, apoc-3.4.0.2-all.jar) to the plugins directory.
 ```sh
   $ git clone https://github.com/ykhwong/neo4j_to_agensgraph.git
   $ cd neo4j_to_agensgraph
+  $ cp preprocecss.p* /path/to/neo4j-community-3.4.5/.
 ```
 
 ## EXPORT CYPHER
 ### FOR THE SMALL DATA SET
-1. Run the neo4j-shell and type the following command.
+1. Run the neo4j-shell and type "export-cypher -o export.cypher".
 
-```
+```sh
+  $ cd /path/to/neo4j-community-3.4.5/bin
+  $ neo4j-shell
   neo4j-sh (?)$ export-cypher -o export.cypher
+  Wrote Nodes xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
+  Wrote Relationships xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
+  Wrote to Cypher-file export.cypher xx. 100%: nodes = xx rels = xx properties = xx time 0 ms total xx ms
+  neo4j-sh (?)$ exit
 ```
 
 export.cypher will be created in the neo4j directory.
 The contents of the file would be something like this:
 
-```
+```sh
+  $ cd /path/to/neo4j-community-3.4.5
+  $ cat export.cypher
   BEGIN
   CREATE (:`person`:`UNIQUE IMPORT LABEL` {`name`:"Billy", `UNIQUE IMPORT ID`:0});
   CREATE (:`person`:`UNIQUE IMPORT LABEL` {`name`:"Jim", `UNIQUE IMPORT ID`:20});
@@ -162,10 +179,16 @@ The following message will be displayed on success.
 ```
 
 ### FOR THE BIG DATA SET
-1. Run the neo4j-shell and type the following command.
+1. Run the neo4j-shell and type "export-cypher -o export.cypher".
 
-```
+```sh
+  $ cd /path/to/neo4j-community-3.4.5/bin
+  $ neo4j-shell
   neo4j-sh (?)$ export-cypher -o export.cypher
+  Wrote Nodes xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
+  Wrote Relationships xx. 100%: nodes = xx rels = xx properties = xx time xx ms total xx ms
+  Wrote to Cypher-file export.cypher xx. 100%: nodes = xx rels = xx properties = xx time 0 ms total xx ms
+  neo4j-sh (?)$ exit
 ```
 
 It may take long time to generate the export.cypher depending on the data size.
@@ -189,7 +212,7 @@ Please note that the existing graph repository named TEMP will be removed and in
 * Originally written in Perl, and subsequently ported to Python.
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
 * '--import-to-agens' option depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
-* Multiple labels from Neo4j are automatically treated as the label inheritances in AgensGraph due to the architectural differences between the two databases. The parent vertex labels that start with "AG_MULV_(number)" will be created in the target side.
+* Multiple labels from Neo4j are automatically converted to the label inheritances in AgensGraph due to the architectural differences between the two databases. The parent vertex labels that start with "AG_MULV_(number)" will be created in the target side.
 
 ### USAGE
 ```
@@ -205,3 +228,4 @@ USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [fil
 
 ## SEE ALSO
 * https://neo4j.com/developer/kb/export-sub-graph-to-cypher-and-import/
+* https://bitnine.net/documentation/
