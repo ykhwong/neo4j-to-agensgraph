@@ -250,7 +250,7 @@ Lists all unique constraints on AgensGraph:
 
 Counts the unique constraints only:
 ```sh
-  $ echo "\dGv [GRAPH_NAME].*; \dGv [GRAPH_NAME].*;" | agens | grep -c "_unique_constraint"
+  $ echo "\dGv [GRAPH_NAME].*; \dGe [GRAPH_NAME].*;" | agens | grep -c "_unique_constraint"
 ```
 
 Counting total nodes:
