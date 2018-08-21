@@ -207,6 +207,74 @@ Please note that the existing graph repository named TEMP will be removed and in
 
 3. Please keep watching the export status from Neo4j.
 
+## GET SCHEMA INFO
+### NEO4J
+Lists all label constraints and indices on Neo4j:
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ schema
+```
+
+More recent version of Neo4j supports these calls (Check the row number):
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ CALL db.indexes();
+  neo4j-sh (?)$ CALL db.constraints();
+```
+
+Counting total nodes:
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ MATCH (n) RETURN COUNT(*);
+```
+
+Counting total edges:
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ MATCH (n)-[r]->() RETURN COUNT(r);
+```
+
+### AGENSGRAPH
+Lists all indices on AgensGraph  (Check the row number):
+```sh
+  $ agens
+  agens=# \dGi+ [GRAPH_NAME].*
+```
+
+Lists all unique constraints on AgensGraph:
+```sh
+  $ agens
+  agens=# \dGv [GRAPH_NAME].*
+  agens=# \dGe [GRAPH_NAME].*
+```
+
+Counts the unique constraints only:
+```sh
+  $ echo "\dGv [GRAPH_NAME].*; \dGv [GRAPH_NAME].*;" | agens | grep -c "_unique_constraint"
+```
+
+Counting total nodes:
+```sh
+  $ agens
+  agens=# SET GRAPH_PATH=[GRAPH_NAME];
+  agens=# MATCH (n) RETURN COUNT(*);
+```
+
+Counting total edges:
+```sh
+  $ agens
+  agens=# SET GRAPH_PATH=[GRAPH_NAME];
+  agens=# MATCH (n)-[r]->() RETURN COUNT(r);
+```
+
+### NOTE
+The count of edges/vertices may not match if there are multiple vertex-labels on Neo4j.
+Please run this Cypher query statement. If the returned value is bigger than 2, then the source database has the multiple labels.
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ MATCH (n) RETURN max(length(labels(n)));
+```
+
 ## TECHNIAL DETAILS
 * Originally written in Perl, and subsequently ported to Python.
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
