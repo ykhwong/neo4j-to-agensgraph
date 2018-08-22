@@ -293,7 +293,7 @@ USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [fil
       [--password]      : Ask password (should happen automatically)
 ```
 
-### Application integration
+### APPLICATION INTEGRATION
 Several interfaces are provided for the integration with applications. Direct methods are as below:
 * Python: https://github.com/bitnine-oss/agensgraph-python
 * NodeJS: https://github.com/bitnine-oss/agensgraph-nodejs
