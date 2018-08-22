@@ -1,5 +1,4 @@
 use strict;
-use DBI;
 use IPC::Open2;
 my %unique_import_id;
 my %multiple_vlabels;
@@ -109,19 +108,6 @@ sub proc {
 			$ls =~ s/$n2/$id/i;
 		}
 	}
-
-	while (1) {
-		if ($ls =~ /$UIL\{$UII\:(\d+)}/) {
-			my $id = $1;
-			my $val = $unique_import_id{$id};
-			$val =~ s/\t/ {/;
-			$val .= '}';
-			$ls =~ s/$UIL\{$UII\:($id)}/$val/;
-		} else {
-			last;
-		}
-	}
-
 	if ($ls =~ /^CREATE +\(:'(\S+)'/i) {
 		$ls =~ s/^CREATE +\(:'(\S+)'/CREATE (:$1/i;
 	}
