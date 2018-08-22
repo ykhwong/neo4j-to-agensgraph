@@ -90,7 +90,6 @@ sub proc {
 	}
 
 	if ($ls =~ /^MATCH +\(n1:$UIL(\{$UII:\d+\})\), +\(n2:$UIL(\{$UII:\d+\})\)/i) {
-		print "TED: $ls\n";
 		my $n1 = $1;
 		my $n2 = $2;
 		$ls =~ s/$UIL//ig;
