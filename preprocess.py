@@ -6,11 +6,13 @@ from subprocess import Popen, PIPE, STDOUT
 unique_import_id={}
 implicit_uii={}
 multiple_vlabels={}
+vertex_hash={}
 UIL="'UNIQUE +IMPORT +LABEL'"
 UII="'UNIQUE +IMPORT +ID'"
 ipc=""
 multiple_vlabel_cnt=0
 use_agens=False
+use_dump=False
 mulv_label_name="AG_MULV_"
 last_uii=0
 last_uii_block=False
@@ -18,7 +20,7 @@ last_uii_begin_number=""
 
 def set_multiple_vlabel(vertexes, s_property):
 	global multiple_vlabel_cnt, multiple_vlabels
-	top_vertex="AG_MULV_";
+	top_vertex="AG_MULV_"
 	multiple_vlabel_cnt=multiple_vlabel_cnt + 1
 	top_vertex = top_vertex + str(multiple_vlabel_cnt)
 	multiple_vlabels[vertexes] = top_vertex + "\t" + s_property
@@ -57,7 +59,7 @@ def proc(ls):
 	ls = re.sub(r'^\s*BEGIN\s*$', r'BEGIN;\n', ls, flags=re.IGNORECASE)
 	ls = re.sub(r'^\s*COMMIT\s*$', r'COMMIT;\n', ls, flags=re.IGNORECASE)
 
-	st = r"^CREATE \(:'(\S+)' +\{(.+)\}\);";
+	st = r"^CREATE \(:'(\S+)' +\{(.+)\}\);"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vlabel = m1.group(1)
@@ -199,6 +201,81 @@ def proc(ls):
 
 	return ls
 
+def proc_dump(ls):
+	if not re.search('^\s*(begin|commit|create )', ls, flags=re.IGNORECASE):
+		return ""
+
+	ls = re.sub("'", "''", ls)
+	ls = re.sub(r'\\"([\},])', r"\\\\'\1", ls)
+	ls = re.sub(r'([^\\])(`|")', r"\1'", ls)
+	ls = re.sub(r'\\"', '"', ls)
+	ls = re.sub(r'^\s*BEGIN\s*$', r'BEGIN;\n', ls, flags=re.IGNORECASE)
+	ls = re.sub(r'^\s*COMMIT\s*$', r'COMMIT;\n', ls, flags=re.IGNORECASE)
+
+        # vertex with multilabels (without property)
+	st = r"^create +\(_(\d+):(\S+)\)"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vnum = m1.group(1)
+		vlabels = m1.group(2)
+		if re.search("':'", vlabels):
+			print("--Multiple labels not supported")
+			exit(1)
+
+	# vertex with multilabels (with property)
+	st = r"create +\(_(\d+):(\S+) +\{(\S+)\}\)"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vnum = m1.group(1)
+		vlabels = m1.group(2)
+		vprop = m1.group(3)
+		if re.search("':'", vlabels):
+			print("--Multiple labels not supported")
+			exit(1)
+
+	# vertex with property
+	st = r"^create +\(_(\d+):'(\S+)' +\{(.+)\}\)\s*$"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vertex_hash[int(m1.group(1))] = str(m1.group(2)) + "\t" + str(m1.group(3))
+		ls = "CREATE (:" + m1.group(2) + " {" + m1.group(3) + "});"
+
+	# vertex without property
+	st = r"^create +\(_(\d+):'(\S+)'\)\s*$"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vertex_hash[int(m1.group(1))] = str(m1.group(2)) + "\t"
+		ls = "CREATE (:" + m1.group(2) + ");"
+
+	# edge with property
+	st = r"^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_\d+\)\s*$"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vnum1=m1.group(1)
+		elabel=m1.group(2)
+		eprop=m1.group(3)
+		vnum2=m1.group(4)
+		vertex1=vertex_hash.get(int(vnum1))
+		vertex2=vertex_hash.get(int(vnum2))
+		vertex1_label, vertex1_prop = vertex1.split("\t")
+		vertex2_label, vertex2_prop = vertex2.split("\t")
+		ls = "MATCH (n1:" + vertex1_label + " {" + vertex1_prop + "}), (n2:" + vertex2_label + " {" + vertex2_prop + "}) CREATE (n1)-[:" + elabel + " {" + eprop + "}]->(n2);"
+
+	# edge without property
+	st = r"^create +\(_(\d+)\)-\[:(\S+)\]->\(_(\d+)\)"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vnum1=m1.group(1)
+		elabel=m1.group(2)
+		vnum2=m1.group(4)
+		vertex1=vertex_hash.get(int(vnum1))
+		vertex2=vertex_hash.get(int(vnum2))
+		vertex1_label, vertex1_prop = vertex1.split("\t")
+		vertex2_label, vertex2_prop = vertex2.split("\t")
+		ls = "MATCH (n1:" + vertex1_label + " {" + vertex1_prop + "}), (n2:" + vertex2_label + " {" + vertex2_prop + "}) CREATE (n1)-[:" + elabel + "]->(n2);"
+
+	return ls
+
 def load_file(filename):
 	f = open(filename, 'r')
 	x = f.readlines()
@@ -214,7 +291,10 @@ def out(ls):
 	m1 = re.search(r'^\s*$', ls)
 	if ls == "" or m1:
 		return
-	line=proc(ls)
+	if use_dump:
+		line=proc_dump(ls)
+	else:
+		line=proc(ls)
 	m1 = re.search(r'^\s*$', line)
 	if line == "" or m1:
 		return
@@ -227,7 +307,7 @@ def out(ls):
 		print(line)
 
 def main():
-	global use_agens, graph_st
+	global use_agens, graph_st, use_dump
 	graph_name=""
 	s_file=""
 	graph_st=""
@@ -236,6 +316,9 @@ def main():
 	for arg in sys.argv[1:]:
 		if arg == "--import-to-agens":
 			use_agens=True
+			continue
+		if arg == "--use-dump":
+			use_dump=True
 			continue
 		m1 = re.search(r'^--graph=(\S+)$', arg)
 		if m1:
@@ -252,7 +335,7 @@ def main():
 		m1 = re.search(r'^--', arg)
 		m2 = re.search(r'^--(h|help)$', arg)
 		if m1 or m2:
-			print("USAGE: python " + sys.argv[0] + " [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]")
+			print("USAGE: python " + sys.argv[0] + " [--import-to-agens] [--graph=GRAPH_NAME] [--use-dump] [--help] [filename (optional if STDIN is provided)]")
 			print("   Additional optional parameters for the AgensGraph integration:")
 			print("      [--dbname=DBNAME] : Database name")
 			print("      [--host=HOST]     : Hostname or IP")

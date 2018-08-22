@@ -3,11 +3,13 @@ use IPC::Open2;
 my %unique_import_id;
 my %implicit_uii;
 my %multiple_vlabels;
+my %vertex_hash;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
 my ($pid, $out, $in);
 my $multiple_vlabel_cnt=0;
 my $use_agens=0;
+my $use_dump=0;
 my $mulv_label_name="AG_MULV_";
 my $last_uii=0;
 my $last_uii_block=0;
@@ -202,6 +204,78 @@ sub proc {
 	return $ls;
 }
 
+sub proc_dump {
+	my $ls = shift;
+	return unless ($ls =~ /^\s*(begin|commit|create )/i);
+	$ls =~ s/'/''/g;
+	$ls =~ s/\\"([\},])/\\\\'$1/g;
+	$ls =~ s/([^\\])(`|")/$1'/g;
+	$ls =~ s/\\"/"/g;
+	$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
+	$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
+
+	# vertex with multilabels (without property)
+	if ($ls =~ /^create +\(_(\d+):(\S+)\)/i) {
+		my $vnum = $1;
+		my $vlabels = $2;
+		if ($vlabels =~ /':'/) {
+			printf("--Multiple labels not supported\n");
+			exit 1;
+		}
+	}
+
+	# vertex with multilabels (with property)
+	if ($ls =~ /^create +\(_(\d+):(\S+) +\{(\S+)\}\)/i) {
+		my $vnum = $1;
+		my $vlabels = $2;
+		my $vprop = $3;
+		if ($vlabels =~ /':'/) {
+			printf("--Multiple labels not supported\n");
+			exit 1;
+		}
+	}
+
+	# vertex with property
+	if ($ls =~ /^create +\(_(\d+):'(\S+)' +\{(.+)\}\)\s*$/i) {
+		$vertex_hash{$1} = "$2\t$3";
+		$ls = "CREATE (:$2 {$3});";
+	}
+	# vertex without property
+	if ($ls =~ /^create +\(_(\d+):'(\S+)'\)\s*$/i) {
+		$vertex_hash{$1} = "$2\t";
+		$ls = "CREATE (:$2);";
+	}
+
+	# edge with property
+	if ($ls =~ /^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_\d+\)\s*$/i) {
+		my $vnum1=$1;
+		my $elabel=$2;
+		my $eprop=$3;
+		my $vnum2=$4;
+		my $vertex1 = $vertex_hash{$vnum1};
+		my $vertex2 = $vertex_hash{$vnum2};
+		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
+		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel {$eprop}]->(n2);";
+	}
+
+	# edge without property
+	if ($ls =~ /^create +\(_(\d+)\)-\[:(\S+)\]->\(_(\d+)\)/) {
+		my $vnum1=$1;
+		my $elabel=$2;
+		my $vnum2=$3;
+		my $vertex1 = $vertex_hash{$vnum1};
+		my $vertex2 = $vertex_hash{$vnum2};
+		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
+		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel]->(n2);";
+
+	}
+
+	$ls =~ s/\s*$//;
+	return $ls;
+}
+
 sub load_file {
 	my $filename = shift;
 	unless ( -f $filename ) {
@@ -224,7 +298,11 @@ sub out {
 	my $ls = shift;
 	my $line;
 	return if ($ls =~ /^\s*$/);
-	$line = proc($ls);
+	if ($use_dump) {
+		$line = proc_dump($ls);
+	} else {
+		$line = proc($ls);
+	}
 	return if ($line =~ /^\s*$/);
 	if ($use_agens) {
 		my $msg;
@@ -246,6 +324,11 @@ sub main {
 			$use_agens=1;
 			next;
 		}
+		if ($arg =~ /^--use-dump$/) {
+			$use_dump=1;
+			next;
+		}
+
 		if ($arg =~ /^--graph=(\S+)$/) {
 			$graph_name=$1;
 			next;
@@ -259,7 +342,7 @@ sub main {
 			next;
 		}
 		if ($arg =~ /^--/ || $arg =~ /^--(h|help)$/) {
-			printf("USAGE: perl $0 [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]\n");
+			printf("USAGE: perl $0 [--import-to-agens] [--graph=GRAPH_NAME] [--use-dump] [--help] [filename (optional if STDIN is provided)]\n");
 			printf("   Additional optional parameters for the AgensGraph integration:\n");
 			printf("      [--dbname=DBNAME] : Database name\n");
 			printf("      [--host=HOST]     : Hostname or IP\n");
