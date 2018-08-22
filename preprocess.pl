@@ -1,6 +1,7 @@
 use strict;
 use IPC::Open2;
 my %unique_import_id;
+my %implicit_uii;
 my %multiple_vlabels;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
@@ -8,6 +9,9 @@ my ($pid, $out, $in);
 my $multiple_vlabel_cnt=0;
 my $use_agens=0;
 my $mulv_label_name="AG_MULV_";
+my $last_uii=0;
+my $last_uii_block=0;
+my $last_uii_begin_number;
 
 sub set_multiple_vlabel {
 	my ($vertexes, $property) = @_;
@@ -16,6 +20,26 @@ sub set_multiple_vlabel {
 	$top_vertex .= $multiple_vlabel_cnt;
 	$multiple_vlabels{$vertexes} = $top_vertex . "\t" . $property;
 	return $top_vertex;
+}
+
+sub set_last_uii {
+	my $id = shift;
+	$last_uii = $id;
+	if (!$last_uii_begin_number) {
+		$last_uii_begin_number=$last_uii;
+	} else {
+		if ($last_uii_block eq 0) {
+			my $size = keys %implicit_uii;
+			foreach my $key (keys %implicit_uii) {
+				my $val = $implicit_uii{$key};
+				my $new_key;
+				delete $implicit_uii{$key};
+				$new_key = $last_uii_begin_number - ($size - $key);
+				$implicit_uii{$new_key} = $val;
+			}
+			$last_uii_block=1;
+		}
+	}
 }
 
 sub proc {
@@ -31,9 +55,20 @@ sub proc {
 	$ls =~ s/^\s*BEGIN\s*$/BEGIN;/i;
 	$ls =~ s/^\s*COMMIT\s*$/COMMIT;/i;
 
+	if ($ls =~/^CREATE \(:'(\S+)' +\{(.+)\}\);/i) {
+		my $vlabel = $1;
+		my $property = $2;
+		if ($ls !~ /$UIL +\{(.+), $UII/) {
+			$last_uii++;
+			print "TED: $last_uii\n";
+			$implicit_uii{$last_uii} = "$vlabel\t$property";
+		}
+	};
+
 	if ($ls =~ /CREATE +\(:'(\S+)':$UIL +\{$UII:(\d+)\}\);/i) {
 		my $vlabel = $1;
 		my $id = $2;
+		set_last_uii($id);
 		if ($vlabel =~ /':'/) {
 			$vlabel =~ s/':'/:/g;
 			$vlabel = set_multiple_vlabel($vlabel, "");
@@ -48,6 +83,7 @@ sub proc {
 		my $vlabel = $1;
 		my $keyval = $2;
 		my $id = $3;
+		set_last_uii($id);
 		if ($vlabel =~ /':'/) {
 			$vlabel =~ s/':'/:/g;
 			$vlabel = set_multiple_vlabel($vlabel, $keyval);
@@ -96,13 +132,27 @@ sub proc {
 		$ls =~ s/\[r:'(\S+)'\]/[r:$1]/i;
 		$ls =~ s/\[:'(\S+)'\]/[:$1]/i;
 		if ($n1 =~ /(\d+)/) {
-			my $id = $unique_import_id{$1};
+			my $num = $1;
+			my $id = $unique_import_id{$num};
+			if (!$id) {
+				$id = $implicit_uii{$num};
+				if(!$id) {
+					$id = "\t";
+				}
+			}
 			$id =~ s/\t/ {/;
 			$id .= '}';
 			$ls =~ s/$n1/$id/i;
 		}
 		if ($n2 =~ /(\d+)/) {
-			my $id = $unique_import_id{$1};
+			my $num = $1;
+			my $id = $unique_import_id{$num};
+			if (!$id) {
+				$id = $implicit_uii{$num};
+				if(!$id) {
+					$id = "\t";
+				}
+			}
 			$id =~ s/\t/ {/;
 			$id .= '}';
 			$ls =~ s/$n2/$id/i;
@@ -113,6 +163,12 @@ sub proc {
 		if ($ls =~ /$UIL\{$UII\:(\d+)}/) {
 			my $id = $1;
 			my $val = $unique_import_id{$id};
+			if (!$val) {
+				$val = $implicit_uii{$id};
+				if(!$val) {
+					$val = "\t";
+				}
+			}
 			$val =~ s/\t/ {/;
 			$val .= '}';
 			$ls =~ s/$UIL\{$UII\:($id)}/$val/;

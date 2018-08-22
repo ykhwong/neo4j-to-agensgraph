@@ -4,6 +4,7 @@ import os.path
 from subprocess import Popen, PIPE, STDOUT
 
 unique_import_id={}
+implicit_uii={}
 multiple_vlabels={}
 UIL="'UNIQUE +IMPORT +LABEL'"
 UII="'UNIQUE +IMPORT +ID'"
@@ -11,6 +12,9 @@ ipc=""
 multiple_vlabel_cnt=0
 use_agens=False
 mulv_label_name="AG_MULV_"
+last_uii=0
+last_uii_block=False
+last_uii_begin_number=""
 
 def set_multiple_vlabel(vertexes, s_property):
 	global multiple_vlabel_cnt, multiple_vlabels
@@ -20,8 +24,23 @@ def set_multiple_vlabel(vertexes, s_property):
 	multiple_vlabels[vertexes] = top_vertex + "\t" + s_property
 	return top_vertex
 
+def set_last_uii(s_id):
+	global last_uii, last_uii_begin_number, last_uii_block, implicit_uii
+	last_uii=s_id
+	if last_uii_begin_number == "":
+		last_uii_begin_number=last_uii
+	else:
+		if last_uii_block == False:
+			size=len(implicit_uii)
+			for key in implicit_uii.copy():
+				val = implicit_uii.get(key)
+				del implicit_uii[key]
+				new_key = int(last_uii_begin_number) - ( int(size) - int(key) )
+				implicit_uii[int(new_key)] = val
+			last_uii_block = True
+
 def proc(ls):
-	global multiple_vlabels
+	global multiple_vlabels, last_uii, implicit_uii
 	if re.search('^SCHEMA +AWAIT', ls, flags=re.IGNORECASE):
 		return ""
 
@@ -38,11 +57,21 @@ def proc(ls):
 	ls = re.sub(r'^\s*BEGIN\s*$', r'BEGIN;\n', ls, flags=re.IGNORECASE)
 	ls = re.sub(r'^\s*COMMIT\s*$', r'COMMIT;\n', ls, flags=re.IGNORECASE)
 
+	st = r"^CREATE \(:'(\S+)' +\{(.+)\}\);";
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if m1:
+		vlabel = m1.group(1)
+		s_property = m1.group(2)
+		if not re.search(UIL + r" +\{(.+)," + UII, ls):
+			last_uii = int(last_uii) + 1
+			implicit_uii[int(last_uii)] = vlabel + "\t" + s_property
+
 	st = r"CREATE +\(:'(\S+)':"+UIL+" +\{"+UII+":(\d+)\}\);"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vlabel = m1.group(1)
 		s_id = m1.group(2)
+		set_last_uii(s_id)
 		if re.search("':'", vlabel):
 			vlabel = re.sub("':'", ":", vlabel)
 			vlabel = set_multiple_vlabel(vlabel, "")
@@ -57,6 +86,7 @@ def proc(ls):
 		vlabel = m1.group(1)
 		keyval = m1.group(2)
 		s_id = m1.group(3)
+		set_last_uii(s_id)
 		if re.search("':'", vlabel):
 			vlabel = re.sub("':'", ":", vlabel)
 			vlabel = set_multiple_vlabel(vlabel, keyval)
@@ -103,12 +133,21 @@ def proc(ls):
 		m2 = re.search(r'(\d+)', n1)
 		if m2:
 			s_id = unique_import_id.get(m2.group(1))
+			if s_id == None:
+				s_id = implicit_uii.get(int(m2.group(1)))
+				if s_id == None:
+					s_id = "\t"
 			s_id = re.sub(r"\t", " {", str(s_id)) + '}'
 			ls = re.sub(n1, s_id, ls, flags=re.IGNORECASE)
 		m2 = re.search(r'(\d+)', n2)
 		if m2:
 			s_id = unique_import_id.get(m2.group(1))
+			if s_id == None:
+				s_id = implicit_uii.get(int(m2.group(1)))
+				if s_id == None:
+					s_id = "\t"
 			s_id = re.sub(r"\t", " {", str(s_id)) + '}'
+
 			ls = re.sub(n2, s_id, ls, flags=re.IGNORECASE)
 
 	while (1):
@@ -117,7 +156,12 @@ def proc(ls):
 		if m1:
 			s_id = m1.group(1)
 			val = unique_import_id.get(s_id)
+			if val == None:
+				val = implicit_uii.get(int(s_id))
+				if val == None:
+					val = "\t"
 			val = re.sub(r"\t", " {", str(val)) + '}'
+
 			ls = re.sub(UIL + '\{' + UII + '\:('+s_id+')}', val, ls, flags=re.IGNORECASE)
 		else:
 			break
