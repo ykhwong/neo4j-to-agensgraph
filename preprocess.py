@@ -111,6 +111,17 @@ def proc(ls):
 			s_id = re.sub(r"\t", " {", str(s_id)) + '}'
 			ls = re.sub(n2, s_id, ls, flags=re.IGNORECASE)
 
+	while (1):
+		st=UIL + '\{' + UII + '\:(\d+)}'
+		m1 = re.search(st, ls, flags=re.IGNORECASE)
+		if m1:
+			s_id = m1.group(1)
+			val = unique_import_id.get(s_id)
+			val = re.sub(r"\t", " {", str(val)) + '}'
+			ls = re.sub(UIL + '\{' + UII + '\:('+s_id+')}', val, ls, flags=re.IGNORECASE)
+		else:
+			break
+
 	st = r"^CREATE +\(:'(\S+)'"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
