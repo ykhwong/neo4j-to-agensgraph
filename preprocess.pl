@@ -60,7 +60,6 @@ sub proc {
 		my $property = $2;
 		if ($ls !~ /$UIL +\{(.+), $UII/) {
 			$last_uii++;
-			print "TED: $last_uii\n";
 			$implicit_uii{$last_uii} = "$vlabel\t$property";
 		}
 	};
