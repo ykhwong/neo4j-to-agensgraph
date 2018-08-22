@@ -223,9 +223,7 @@ Besides the export-cypher method above, Neo4j's dump also can be used for the ex
 * DROP INDEX: https://neo4j.com/docs/developer-manual/current/cypher/schema/index/
 * DROP CONSTRAINT: https://neo4j.com/docs/developer-manual/current/cypher/schema/constraints/#constraints-drop-unique-constraint
 
-3. Create a file that includes "dump" and run it with neo4j-shell.
-
-"neo4j-shell -c dump" also can be used but may not work properly in some systems.
+3. Create a file that includes "dump" and run it with neo4j-shell. "neo4j-shell -c dump" also can be used but may not work properly in some systems.
 ```sh
   $ echo dump>dump.txt
   $ neo4j-shell -file dump.txt>export.cypher
