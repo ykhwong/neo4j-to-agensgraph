@@ -138,11 +138,18 @@ def proc(ls):
 	if m1:
 		ls = re.sub(st, r"CREATE CONSTRAINT ON \1 ASSERT \2", ls, flags=re.IGNORECASE)
 
-	st = r"^MATCH +\(n1:'*(\S+)'*"
+	st = r"^MATCH +\(n1:'*(\S+)'*\s*\{"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
-		ls = re.sub(r"^MATCH +\(n1:'*(\S+)'*\s*\{", r"MATCH (n1:\1 {", ls, flags=re.IGNORECASE)
-		ls = re.sub(r" +\(n2:'*(\S+)'*\s*\{", r" (n2:\1 {", ls, flags=re.IGNORECASE)
+		val = m1.group(1)
+		val = re.sub(r"'$", "", val)
+		ls = re.sub(r"^MATCH +\(n1:'*(\S+)'*\s*\{", "MATCH (n1:" + val + " {", ls, flags=re.IGNORECASE)
+		st = r" +\(n2:'*(\S+)'*\s*\{"
+		m2 = re.search(st, ls, flags=re.IGNORECASE)
+		if m2:
+			val = m2.group(1)
+			val = re.sub(r"'$", "", val)
+			ls = re.sub(r" +\(n2:'*(\S+)'*\s*\{", " (n2:" + val + " {", ls, flags=re.IGNORECASE)
 		ls = re.sub(r"\[:'(\S+)'\]", r"[:\1]", ls, flags=re.IGNORECASE)
 		ls = re.sub(r"\[:'(\S+)' ", r"[:\1 ", ls, flags=re.IGNORECASE)
 
