@@ -283,7 +283,7 @@ Please run this Cypher query statement. If the returned value is bigger than 1, 
 
 ### USAGE
 ```
-USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [filename (optional if STDIN is provided)]
+USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--use-dump] [--help] [filename (optional if STDIN is provided)]
    Additional optional parameters for the AgensGraph integration:
       [--dbname=DBNAME] : Database name
       [--host=HOST]     : Hostname or IP
