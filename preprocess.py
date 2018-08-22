@@ -103,12 +103,12 @@ def proc(ls):
 		m2 = re.search(r'(\d+)', n1)
 		if m2:
 			s_id = unique_import_id.get(m2.group(1))
-			s_id = re.sub(r"\t", " {", s_id) + '}'
+			s_id = re.sub(r"\t", " {", str(s_id)) + '}'
 			ls = re.sub(n1, s_id, ls, flags=re.IGNORECASE)
 		m2 = re.search(r'(\d+)', n2)
 		if m2:
 			s_id = unique_import_id.get(m2.group(1))
-			s_id = re.sub(r"\t", " {", s_id) + '}'
+			s_id = re.sub(r"\t", " {", str(s_id)) + '}'
 			ls = re.sub(n2, s_id, ls, flags=re.IGNORECASE)
 
 	st = r"^CREATE +\(:'(\S+)'"
