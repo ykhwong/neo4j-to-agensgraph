@@ -322,16 +322,16 @@ Or you can use the python interpreter instead.
 
 Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
 
-7. If it takes too long time for the dump, then you can use this command during the export.
+7. If it takes too long time for the dump, then you can use this command during the export. Don't forget to use "--use-dump" option.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
-  $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
+  $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens --use-dump
 ```
 
 Or you can use the python interpreter instead.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
-  $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens
+  $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens --use-dump
 ```
 
 
