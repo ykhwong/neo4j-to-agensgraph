@@ -207,6 +207,136 @@ Please note that the existing graph repository named TEMP will be removed and in
 
 3. Please keep watching the export status from Neo4j.
 
+## DUMP OPTION
+NOTE: This is optional, therefore you don't have to follow this method. Also, it does not currently support the multi-labels.
+
+Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them.
+
+1. Check the existing indexes and constraints.
+```sh
+  $ neo4j-shell
+  neo4j-sh (?)$ CALL db.indexes();
+  neo4j-sh (?)$ CALL db.constraints();
+```
+
+2. Drop the listed constraints manually. For details, please refer to:
+* DROP INDEX: https://neo4j.com/docs/developer-manual/current/cypher/schema/index/
+* DROP CONSTRAINT: https://neo4j.com/docs/developer-manual/current/cypher/schema/constraints/#constraints-drop-unique-constraint
+
+3. Create a file that includes "dump" and run it with neo4j-shell.
+
+"neo4j-shell -c dump" also can be used but may not work properly in some systems.
+```sh
+  $ echo dump>dump.txt
+  $ neo4j-shell -file dump.txt>export.cypher
+```
+
+4. export.cypher file will be created. The contents of the file would be something like this:
+```
+begin
+commit
+begin
+create (_12836:`V_PRO1` {`id`:763})
+create (_12837:`V_PRO1` {`id`:552})
+create (_12838:`V_PRO1` {`test_str`:"love"})
+create (_12839:`V_PRO2` {`id`:456, `name`:"Ted"})
+create (_12840:`V_PRO2` {`color`:"red", `target`:"apple"})
+create (_12841:`V_PRO3` {`hobby`:"Badminton", `id`:789, `name`:"Kim"})
+create (_12842:`V_PRO3` {`color`:"yellow", `price`:5, `target`:"banana"})
+create (_12843:`V_PRO4` {`category`:"video_game", `genre`:"Platform", `name`:"rayman", `publisher`:"Ubisoft", `released`:[1995, 1996, 2000, 2001, 2009, 2016]})
+create (_12844:`V_PRO4` {`category`:"video_game", `genre`:"Platform", `name`:"prehistorik2", `platform`:["Amstrad CPC", "MS-DOS"], `publisher`:"Titus France", `released`:1993})
+create (_12845:`V_NO_PRO`)
+create (_12846:`V_MULTI_PRO1`:`V_MULTI_PRO2` {`id`:224})
+create (_12847:`V_MULTI_PRO3`:`V_MULTI_PRO4` {`id`:578, `name`:"Harry"})
+create (_12848:`V_MULTI_PRO5`:`V_MULTI_PRO6` {`item`:"chocolate", `price`:1, `taste`:"sweet"})
+create (_18870:`V_MULTI_PRO7`:`V_MULTI_PRO8`:`V_MULTI_PRO9` {`affected`:["South Korea", "Japan"], `date`:"2018-08-16", `id`:19, `name`:"Soulik", `origin`:"about 260km northwest from Guam", `submitted_by`:"Micronesia", `type`:"typhoon"})
+create (_18871:`V_MULTI_NO_PRO1`:`V_MULTI_NO_PRO2`)
+create (_18872:`V_MULTI_NO_PRO3`:`V_MULTI_NO_PRO4`:`V_MULTI_NO_PRO5`)
+create (_12836)-[:`E_NO_PRO`]->(_12837)
+create (_12837)-[:`E_PRO4` {`test1`:"something", `test2`:[100, 33, 21, 33], `test3`:"something2"}]->(_18870)
+create (_12839)-[:`E_PRO3` {`finished_level`:["spring", "summer", "fall", "winter"], `place`:"United States", `type`:"purchased"}]->(_12844)
+create (_12839)-[:`E_PRO2` {`common_interest`:"Badminton", `relation`:"Friend"}]->(_12841)
+create (_12839)-[:`E_PRO1` {`type`:"purchased"}]->(_12842)
+create (_12841)-[:`E_PRO3` {`place`:"France", `platform`:"PC", `type`:"purchased"}]->(_12843)
+;
+commit
+```
+
+5. Run the below command to begin the preprocess. Don't forget to use "--use-dump" option.
+```sh
+  $ perl preprocess.pl export.cypher --graph=TEMP --use-dump
+```
+
+Or you can use the python interpreter instead.
+```sh
+  $ python preprocess.py export.cypher --graph=TEMP --use-dump
+```
+
+Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
+
+The following message will be displayed on success.
+```
+DROP GRAPH IF EXISTS TEMP CASCADE;
+CREATE GRAPH TEMP;
+SET GRAPH_PATH=TEMP;
+BEGIN;
+COMMIT;
+BEGIN;
+CREATE (:V_PRO1 {'id':763});
+CREATE (:V_PRO1 {'id':552});
+CREATE (:V_PRO1 {'test_str':'love'});
+CREATE (:V_PRO2 {'id':456, 'name':'Ted'});
+CREATE (:V_PRO2 {'color':'red', 'target':'apple'});
+CREATE (:V_PRO3 {'hobby':'Badminton', 'id':789, 'name':'Kim'});
+CREATE (:V_PRO3 {'color':'yellow', 'price':5, 'target':'banana'});
+CREATE (:V_PRO4 {'category':'video_game', 'genre':'Platform', 'name':'rayman', 'publisher':'Ubisoft', 'released':[1995, 1996, 2000, 2001, 2009, 2016]});
+CREATE (:V_PRO4 {'category':'video_game', 'genre':'Platform', 'name':'prehistorik2', 'platform':['Amstrad CPC', 'MS-DOS'], 'publisher':'Titus France', 'released':1993});
+CREATE (:V_NO_PRO);
+--Multiple labels not supported
+CREATE (:V_MULTI_PRO1':'V_MULTI_PRO2 {'id':224});
+CREATE (:V_MULTI_PRO3':'V_MULTI_PRO4 {'id':578, 'name':'Harry'});
+CREATE (:V_MULTI_PRO5':'V_MULTI_PRO6 {'item':'chocolate', 'price':1, 'taste':'sweet'});
+CREATE (:V_MULTI_PRO7':'V_MULTI_PRO8':'V_MULTI_PRO9 {'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'id':19, 'name':'Soulik', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon'});
+--Multiple labels not supported
+CREATE (:V_MULTI_NO_PRO1':'V_MULTI_NO_PRO2);
+--Multiple labels not supported
+CREATE (:V_MULTI_NO_PRO3':'V_MULTI_NO_PRO4':'V_MULTI_NO_PRO5);
+MATCH (n1:V_PRO1 {'id':763}), (n2:V_PRO1 {'id':552}) CREATE (n1)-[:'E_NO_PRO']->(n2);
+MATCH (n1:V_PRO1 {'id':552}), (n2: {}) CREATE (n1)-[:'E_PRO4' {'test1':'something', 'test2':[100, 33, 21, 33], 'test3':'something2'}]->(n2);
+MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2: {}) CREATE (n1)-[:'E_PRO3' {'finished_level':['spring', 'summer', 'fall', 'winter'], 'place':'United States', 'type':'purchased'}]->(n2);
+MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2: {}) CREATE (n1)-[:'E_PRO2' {'common_interest':'Badminton', 'relation':'Friend'}]->(n2);
+MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2: {}) CREATE (n1)-[:'E_PRO1' {'type':'purchased'}]->(n2);
+MATCH (n1:V_PRO3 {'hobby':'Badminton', 'id':789, 'name':'Kim'}), (n2: {}) CREATE (n1)-[:'E_PRO3' {'place':'France', 'platform':'PC', 'type':'purchased'}]->(n2);
+COMMIT;
+```
+
+Currently, above result used the multi-labels which are not processed by the preprocessor with the dump option. So, please exclude any multi-labels.
+
+6. If you want to import the preprocessed result to AgensGraph, please type the following. Don't forget to use "--use-dump" option.
+```sh
+  $ perl preprocess.pl export.cypher --graph=TEMP --import-to-agens --use-dump
+```
+
+Or you can use the python interpreter instead.
+```sh
+  $ python preprocess.py export.cypher --graph=TEMP --import-to-agens --use-dump
+```
+
+Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
+
+7. If it takes too long time for the dump, then you can use this command during the export.
+```sh
+  $ cd /path/to/neo4j-community-3.4.5
+  $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens
+```
+
+Or you can use the python interpreter instead.
+```sh
+  $ cd /path/to/neo4j-community-3.4.5
+  $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens
+```
+
+
 ## GET SCHEMA INFO
 ### NEO4J
 Lists all label constraints and indices on Neo4j:
@@ -280,6 +410,7 @@ Please run this Cypher query statement. If the returned value is bigger than 1, 
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
 * '--import-to-agens' option depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
 * Multiple labels from Neo4j are automatically converted to the label inheritances in AgensGraph due to the architectural differences between the two databases. The parent vertex labels that start with "AG_MULV_(number)" will be created in the target side.
+* Do not use '--use-dump' option for the multiple labels.
 
 ### USAGE
 ```
