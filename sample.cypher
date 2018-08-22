@@ -66,41 +66,19 @@ CREATE CONSTRAINT ON (n1:V_PRO3) ASSERT n1.target IS UNIQUE;
 //CREATE (:`V_PRO1` {`id`:763});
 //CREATE (:`V_PRO1` {`id`:552});
 //CREATE (:`V_PRO1` {`test_str`:"love"});
-//CREATE (:`V_PRO2`:`UNIQUE IMPORT LABEL` {`id`:456, `name`:"Ted", `UNIQUE IMPORT ID`:18656});
-//CREATE (:`V_PRO2`:`UNIQUE IMPORT LABEL` {`target`:"apple", `color`:"red", `UNIQUE IMPORT ID`:18657});
-//CREATE (:`V_PRO3` {`id`:789, `name`:"Kim", `hobby`:"Badminton"});
+//CREATE (:`V_PRO2`:`UNIQUE IMPORT LABEL` {`id`:456, `name`:"Ted", `UNIQUE IMPORT ID`:12839});
+//CREATE (:`V_PRO2`:`UNIQUE IMPORT LABEL` {`target`:"apple", `color`:"red", `UNIQUE IMPORT ID`:12840});
+//CREATE (:`V_PRO3` {`hobby`:"Badminton", `id`:789, `name`:"Kim"});
 //CREATE (:`V_PRO3` {`target`:"banana", `color`:"yellow", `price`:5});
-//CREATE (:`V_PRO4`:`UNIQUE IMPORT LABEL` {`category`:"video_game", `name`:"rayman", `genre`:"Platform", `publisher`:"Ubisoft", `released`:[1995, 1996, 2000, 2001, 2009, 2016], `UNIQUE IMPORT ID`:18660});
-//CREATE (:`V_PRO4`:`UNIQUE IMPORT LABEL` {`category`:"video_game", `name`:"prehistorik2", `genre`:"Platform", `platform`:["Amstrad CPC", "MS-DOS"], `publisher`:"Titus France", `released`:1993, `UNIQUE IMPORT ID`:18661});
-//CREATE (:`V_NO_PRO`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:18662});
-//CREATE (:`V_MULTI_PRO1`:`V_MULTI_PRO2`:`UNIQUE IMPORT LABEL` {`id`:224, `UNIQUE IMPORT ID`:18663});
-//CREATE (:`V_MULTI_PRO3`:`V_MULTI_PRO4`:`UNIQUE IMPORT LABEL` {`id`:578, `name`:"Harry", `UNIQUE IMPORT ID`:18664});
-//CREATE (:`V_MULTI_PRO5`:`V_MULTI_PRO6`:`UNIQUE IMPORT LABEL` {`item`:"chocolate", `price`:1, `taste`:"sweet", `UNIQUE IMPORT ID`:18665});
-//CREATE (:`V_MULTI_PRO7`:`V_MULTI_PRO8`:`V_MULTI_PRO9`:`UNIQUE IMPORT LABEL` {`id`:19, `name`:"Soulik", `affected`:["South Korea", "Japan"], `date`:"2018-08-16", `origin`:"about 260km northwest from Guam", `submitted_by`:"Micronesia", `type`:"typhoon", `UNIQUE IMPORT ID`:18666});
-//CREATE (:`V_MULTI_NO_PRO1`:`V_MULTI_NO_PRO2`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:18667});
-//CREATE (:`V_MULTI_NO_PRO3`:`V_MULTI_NO_PRO4`:`V_MULTI_NO_PRO5`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:18668});
-//commit
-//begin
-//CREATE INDEX ON :`V_PRO4`(`name`);
-//CREATE INDEX ON :`V_PRO4`(`category`);
-//CREATE CONSTRAINT ON (node:`V_PRO1`) ASSERT node.`test_svr` IS UNIQUE;
-//CREATE CONSTRAINT ON (node:`V_PRO3`) ASSERT node.`target` IS UNIQUE;
-//CREATE CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
-//commit
-//schema await
-//begin
-//MATCH (n1:`V_PRO1`{`id`:763}), (n2:`V_PRO1`{`id`:552}) CREATE (n1)-[:`E_NO_PRO`]->(n2);
-//MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18656}), (n2:`V_PRO3`{`target`:"banana"}) CREATE (n1)-[:`E_PRO1` {`type`:"purchased"}]->(n2);
-//MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18656}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18658}) CREATE (n1)-[:`E_PRO2` {`common_interest`:"Badminton", `relation`:"Friend"}]->(n2);
-//MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18658}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18660}) CREATE (n1)-[:`E_PRO3` {`place`:"France", `platform`:"PC", `type`:"purchased"}]->(n2);
-//MATCH (n1:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18656}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18661}) CREATE (n1)-[:`E_PRO3` {`finished_level`:["spring", "summer", "fall", "winter"], `place`:"United States", `type`:"purchased"}]->(n2);
-//MATCH (n1:`V_PRO1`{`id`:552}), (n2:`UNIQUE IMPORT LABEL`{`UNIQUE IMPORT ID`:18666}) CREATE (n1)-[:`E_PRO4` {`test1`:"something", `test2`:[100, 33, 21, 33], `test3`:"something2"}]->(n2);
-//commit
-//begin
-//MATCH (n:`UNIQUE IMPORT LABEL`)  WITH n LIMIT 1000 REMOVE n:`UNIQUE IMPORT LABEL` REMOVE n.`UNIQUE IMPORT ID`;
-//commit
-//begin
-//DROP CONSTRAINT ON (node:`UNIQUE IMPORT LABEL`) ASSERT node.`UNIQUE IMPORT ID` IS UNIQUE;
+//CREATE (:`V_PRO4`:`UNIQUE IMPORT LABEL` {`category`:"video_game", `genre`:"Platform", `name`:"rayman", `publisher`:"Ubisoft", `released`:[1995, 1996, 2000, 2001, 2009, 2016], `UNIQUE IMPORT ID`:12843});
+//CREATE (:`V_PRO4`:`UNIQUE IMPORT LABEL` {`category`:"video_game", `genre`:"Platform", `name`:"prehistorik2", `platform`:["Amstrad CPC", "MS-DOS"], `publisher`:"Titus France", `released`:1993, `UNIQUE IMPORT ID`:12844});
+//CREATE (:`V_NO_PRO`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:12845});
+//CREATE (:`V_MULTI_PRO1`:`V_MULTI_PRO2`:`UNIQUE IMPORT LABEL` {`id`:224, `UNIQUE IMPORT ID`:12846});
+//CREATE (:`V_MULTI_PRO3`:`V_MULTI_PRO4`:`UNIQUE IMPORT LABEL` {`id`:578, `name`:"Harry", `UNIQUE IMPORT ID`:12847});
+//CREATE (:`V_MULTI_PRO5`:`V_MULTI_PRO6`:`UNIQUE IMPORT LABEL` {`item`:"chocolate", `price`:1, `taste`:"sweet", `UNIQUE IMPORT ID`:12848});
+//CREATE (:`V_MULTI_PRO7`:`V_MULTI_PRO8`:`V_MULTI_PRO9`:`UNIQUE IMPORT LABEL` {`affected`:["South Korea", "Japan"], `date`:"2018-08-16", `id`:19, `name`:"Soulik", `origin`:"about 260km northwest from Guam", `submitted_by`:"Micronesia", `type`:"typhoon", `UNIQUE IMPORT ID`:18870});
+//CREATE (:`V_MULTI_NO_PRO1`:`V_MULTI_NO_PRO2`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:18871});
+//CREATE (:`V_MULTI_NO_PRO3`:`V_MULTI_NO_PRO4`:`V_MULTI_NO_PRO5`:`UNIQUE IMPORT LABEL` {`UNIQUE IMPORT ID`:18872});
 //commit
 
 
@@ -114,10 +92,10 @@ CREATE CONSTRAINT ON (n1:V_PRO3) ASSERT n1.target IS UNIQUE;
 //CREATE (:V_PRO1 {'test_str':'love'});
 //CREATE (:V_PRO2 {'id':456, 'name':'Ted'});
 //CREATE (:V_PRO2 {'target':'apple', 'color':'red'});
-//CREATE (:V_PRO3 {'id':789, 'name':'Kim', 'hobby':'Badminton'});
+//CREATE (:V_PRO3 {'hobby':'Badminton', 'id':789, 'name':'Kim'});
 //CREATE (:V_PRO3 {'target':'banana', 'color':'yellow', 'price':5});
-//CREATE (:V_PRO4 {'category':'video_game', 'name':'rayman', 'genre':'Platform', 'publisher':'Ubisoft', 'released':[1995, 1996, 2000, 2001, 2009, 2016]});
-//CREATE (:V_PRO4 {'category':'video_game', 'name':'prehistorik2', 'genre':'Platform', 'platform':['Amstrad CPC', 'MS-DOS'], 'publisher':'Titus France', 'released':1993});
+//CREATE (:V_PRO4 {'category':'video_game', 'genre':'Platform', 'name':'rayman', 'publisher':'Ubisoft', 'released':[1995, 1996, 2000, 2001, 2009, 2016]});
+//CREATE (:V_PRO4 {'category':'video_game', 'genre':'Platform', 'name':'prehistorik2', 'platform':['Amstrad CPC', 'MS-DOS'], 'publisher':'Titus France', 'released':1993});
 //CREATE (:V_NO_PRO);
 //COMMIT;
 //BEGIN;
@@ -137,26 +115,8 @@ CREATE CONSTRAINT ON (n1:V_PRO3) ASSERT n1.target IS UNIQUE;
 //CREATE (:V_MULTI_PRO5 { 'item':'chocolate', 'price':1, 'taste':'sweet' });
 //CREATE (:V_MULTI_PRO6 { 'item':'chocolate', 'price':1, 'taste':'sweet' });
 //CREATE VLABEL AG_MULV_3 INHERITS (V_MULTI_PRO5, V_MULTI_PRO6);
-//CREATE (:V_MULTI_PRO7 { 'id':19, 'name':'Soulik', 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
-//CREATE (:V_MULTI_PRO8 { 'id':19, 'name':'Soulik', 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
-//CREATE (:V_MULTI_PRO9 { 'id':19, 'name':'Soulik', 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
+//CREATE (:V_MULTI_PRO7 { 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'id':19, 'name':'Soulik', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
+//CREATE (:V_MULTI_PRO8 { 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'id':19, 'name':'Soulik', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
+//CREATE (:V_MULTI_PRO9 { 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'id':19, 'name':'Soulik', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon' });
 //CREATE VLABEL AG_MULV_4 INHERITS (V_MULTI_PRO7, V_MULTI_PRO8, V_MULTI_PRO9);
-//COMMIT;
-//BEGIN;
-//CREATE PROPERTY INDEX ON V_PRO4(name);
-//CREATE PROPERTY INDEX ON V_PRO4(category);
-//CREATE CONSTRAINT ON V_PRO1 ASSERT test_svr IS UNIQUE;
-//CREATE CONSTRAINT ON V_PRO3 ASSERT target IS UNIQUE;
-//COMMIT;
-//BEGIN;
-//MATCH (n1:V_PRO1 {'id':763}), (n2:V_PRO1 {'id':552}) CREATE (n1)-[:E_NO_PRO]->(n2);
-//MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2:V_PRO3 {'target':'banana'}) CREATE (n1)-[:E_PRO1 {'type':'purchased'}]->(n2);
-//MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2:V_PRO3 {'id':789, 'name':'Kim', 'hobby':'Badminton'}) CREATE (n1)-[:E_PRO2 {'common_interest':'Badminton', 'relation':'Friend'}]->(n2);
-//MATCH (n1:V_PRO3 {'id':789, 'name':'Kim', 'hobby':'Badminton'}), (n2:V_PRO4 {'category':'video_game', 'name':'rayman', 'genre':'Platform', 'publisher':'Ubisoft', 'released':[1995, 1996, 2000, 2001, 2009, 2016]}) CREATE (n1)-[:E_PRO3 {'place':'France', 'platform':'PC', 'type':'purchased'}]->(n2);
-//MATCH (n1:V_PRO2 {'id':456, 'name':'Ted'}), (n2:V_PRO4 {'category':'video_game', 'name':'prehistorik2', 'genre':'Platform', 'platform':['Amstrad CPC', 'MS-DOS'], 'publisher':'Titus France', 'released':1993}) CREATE (n1)-[:E_PRO3 {'finished_level':['spring', 'summer', 'fall', 'winter'], 'place':'United States', 'type':'purchased'}]->(n2);
-//MATCH (n1:V_PRO1 {'id':552}), (n2:AG_MULV_4 {'id':19, 'name':'Soulik', 'affected':['South Korea', 'Japan'], 'date':'2018-08-16', 'origin':'about 260km northwest from Guam', 'submitted_by':'Micronesia', 'type':'typhoon'}) CREATE (n1)-[:E_PRO4 {'test1':'something', 'test2':[100, 33, 21, 33], 'test3':'something2'}]->(n2);
-//COMMIT;
-//BEGIN;
-//COMMIT;
-//BEGIN;
 //COMMIT;
