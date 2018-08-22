@@ -54,7 +54,7 @@ MATCH (n1:V_PRO1 { id: 552 }), (n2:V_MULTI_PRO8 { name: 'Soulik' }) CREATE (n1)-
 
 
 // Create Index
-CREATE INDEX ON :V_PRO4(category);
+CREATE INDEX ON :V_PRO4(category, name);
 
 // Create UNIQUE Constraint
 CREATE CONSTRAINT ON (n1:V_PRO1) ASSERT n1.test_svr IS UNIQUE;
