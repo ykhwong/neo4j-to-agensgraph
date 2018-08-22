@@ -293,6 +293,18 @@ USAGE: perl preprocess.pl [--import-to-agens] [--graph=GRAPH_NAME] [--help] [fil
       [--password]      : Ask password (should happen automatically)
 ```
 
+### Application integration
+Several interfaces are provided for the integration with applications. Direct methods are as below:
+* Python: https://github.com/bitnine-oss/agensgraph-python
+* NodeJS: https://github.com/bitnine-oss/agensgraph-nodejs
+* Golang: https://github.com/bitnine-oss/agensgraph-golang
+* JDBC: https://github.com/bitnine-oss/agensgraph-jdbc
+* RestAPI via AgensBrowser
+
+Other languages or implementations are also supported via JDBC. For example:
+* Perl: https://metacpan.org/pod/JDBC
+* R: http://rforge.net/RJDBC/
+
 ## SEE ALSO
 * https://neo4j.com/developer/kb/export-sub-graph-to-cypher-and-import/
 * https://bitnine.net/documentation/
