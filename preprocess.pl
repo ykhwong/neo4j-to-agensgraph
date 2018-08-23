@@ -3,6 +3,7 @@ use IPC::Open2;
 my %unique_import_id;
 my %implicit_uii;
 my %multiple_vlabels;
+my %multiple_vlabels_dump;
 my %vertex_hash;
 my $UIL="'UNIQUE +IMPORT +LABEL'";
 my $UII="'UNIQUE +IMPORT +ID'";
@@ -22,6 +23,14 @@ sub set_multiple_vlabel {
 	$top_vertex .= $multiple_vlabel_cnt;
 	$multiple_vlabels{$vertexes} = $top_vertex . "\t" . $property;
 	return $top_vertex;
+}
+
+sub set_multiple_vlabel_dump {
+	my ($id, $vertexes, $property) = @_;
+	my $str = set_multiple_vlabel($vertexes, $property);
+	my $top_vertex = $mulv_label_name . $multiple_vlabel_cnt;
+	$multiple_vlabels_dump{$id} = $top_vertex . "\t" . $property;
+	return $str;
 }
 
 sub set_last_uii {
@@ -228,7 +237,7 @@ sub proc_dump {
 				$vertexes .= $item . ":";
 			}
 			$vertexes =~ s/:$//;
-			set_multiple_vlabel($vertexes, "");
+			set_multiple_vlabel_dump($vnum, $vertexes, "");
 			return "";
 		}
 	}
@@ -246,7 +255,7 @@ sub proc_dump {
 				$vertexes .= $item . ":";
 			}
 			$vertexes =~ s/:$//;
-			set_multiple_vlabel($vertexes, $vprop);
+			set_multiple_vlabel_dump($vnum, $vertexes, $vprop);
 			return "";
 		}
 	}
@@ -298,8 +307,20 @@ sub proc_dump {
 		my $vnum2=$4;
 		my $vertex1 = $vertex_hash{$vnum1};
 		my $vertex2 = $vertex_hash{$vnum2};
-		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
-		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		my ($vertex1_label, $vertex1_prop);
+		my ($vertex2_label, $vertex2_prop);
+		if ($vertex1) {
+			($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
+		} else {
+			my $str = $multiple_vlabels_dump{$vnum1};
+			($vertex1_label, $vertex1_prop) = (split /\t/, $str);
+		}
+		if ($vertex2) {
+			($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		} else {
+			my $str = $multiple_vlabels_dump{$vnum2};
+			($vertex2_label, $vertex2_prop) = (split /\t/, $str);
+		}
 		$elabel =~ s/^\s*'(.+)'\s*$/$1/;
 		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel {$eprop}]->(n2);";
 	}
@@ -311,8 +332,20 @@ sub proc_dump {
 		my $vnum2=$3;
 		my $vertex1 = $vertex_hash{$vnum1};
 		my $vertex2 = $vertex_hash{$vnum2};
-		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
-		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		my ($vertex1_label, $vertex1_prop);
+		my ($vertex2_label, $vertex2_prop);
+		if ($vertex1) {
+			($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
+		} else {
+			my $str = $multiple_vlabels_dump{$vnum1};
+			($vertex1_label, $vertex1_prop) = (split /\t/, $str);
+		}
+		if ($vertex2) {
+			($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		} else {
+			my $str = $multiple_vlabels_dump{$vnum2};
+			($vertex2_label, $vertex2_prop) = (split /\t/, $str);
+		}
 		$elabel =~ s/^\s*'(.+)'\s*$/$1/;
 		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel]->(n2);";
 

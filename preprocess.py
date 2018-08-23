@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 unique_import_id={}
 implicit_uii={}
 multiple_vlabels={}
+multiple_vlabels_dump={}
 vertex_hash={}
 UIL="'UNIQUE +IMPORT +LABEL'"
 UII="'UNIQUE +IMPORT +ID'"
@@ -19,12 +20,19 @@ last_uii_block=False
 last_uii_begin_number=""
 
 def set_multiple_vlabel(vertexes, s_property):
-	global multiple_vlabel_cnt, multiple_vlabels
-	top_vertex="AG_MULV_"
+	global multiple_vlabel_cnt, multiple_vlabels, mulv_label_name
+	top_vertex=mulv_label_name
 	multiple_vlabel_cnt=int(multiple_vlabel_cnt) + 1
 	top_vertex = top_vertex + str(multiple_vlabel_cnt)
 	multiple_vlabels[vertexes] = str(top_vertex) + "\t" + str(s_property)
 	return top_vertex
+
+def set_multiple_vlabel_dump(s_id, vertexes, s_property):
+	global multiple_vlabel_cnt, multiple_vlabels_dump, mulv_label_name
+	s_str=set_multiple_vlabel(vertexes, s_property)
+	top_vertex = mulv_label_name + str(multiple_vlabel_cnt)
+	multiple_vlabels_dump[int(s_id)] = str(top_vertex) + "\t" + str(s_property)
+	return s_str
 
 def set_last_uii(s_id):
 	global last_uii, last_uii_begin_number, last_uii_block, implicit_uii
@@ -99,7 +107,7 @@ def proc(ls):
 		if multiple_vlabels:
 			ls = "BEGIN;\n"
 
-			for key in multiple_vlabels:
+			for key in sorted(multiple_vlabels.keys.iterkeys()):
 				val = multiple_vlabels.get(key)
 				val1, s_property = val.split("\t")
 				prev=""
@@ -200,7 +208,7 @@ def proc(ls):
 	return ls
 
 def proc_dump(ls):
-	global multiple_vlabels
+	global multiple_vlabels, multiple_vlabels_dump, set_multiple_vlabe_dump
 	mlabel_ls=""
 	if not re.search('^\s*(begin|commit|create )', ls, flags=re.IGNORECASE):
 		return ""
@@ -227,7 +235,7 @@ def proc_dump(ls):
 			for item in lbls:
 				vertexes = vertexes + str(item) + ":"
 			vertexes = re.sub(":$", "", vertexes)
-			set_multiple_vlabel(str(vertexes), "")
+			set_multiple_vlabel_dump(int(vnum), str(vertexes), "")
 			return ""
 
 	# vertex with multilabels (with property)
@@ -246,13 +254,13 @@ def proc_dump(ls):
 			for item in lbls:
 				vertexes = vertexes + str(item) + ":"
 			vertexes = re.sub(":$", "", vertexes)
-			set_multiple_vlabel(str(vertexes), vprop)
+			set_multiple_vlabel_dump(int(vnum), str(vertexes), vprop)
 			return ""
 
 	st = r"^create +\(_\d+\)-"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if multiple_vlabels:
-		for key in multiple_vlabels:
+		for key in sorted(multiple_vlabels.iterkeys()):
 			val = multiple_vlabels.get(key)
 			val1, s_property = val.split("\t")
 			prev=""
@@ -297,9 +305,21 @@ def proc_dump(ls):
 		vnum2=m1.group(4)
 		vertex1=vertex_hash.get(int(vnum1))
 		vertex2=vertex_hash.get(int(vnum2))
-		vertex1_label, vertex1_prop = vertex1.split("\t")
-		vertex2_label, vertex2_prop = vertex2.split("\t")
-		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1 ", ls)
+		vertex1_label=""
+		vertex1_prop=""
+		vertex2_label=""
+		vertex2_prop=""
+		if vertex1:
+			vertex1_label, vertex1_prop = vertex1.split("\t")
+		else:
+			s_str = multiple_vlabels_dump.get(int(vnum1))
+			vertex1_label, vertex1_prop = s_str.split("\t")
+		if vertex2:
+			vertex2_label, vertex2_prop = vertex2.split("\t")
+		else:
+			s_str = multiple_vlabels_dump.get(int(vnum2))
+			vertex2_label, vertex2_prop = s_str.split("\t")
+		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1", elabel)
 		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + " {" + str(eprop) + "}]->(n2);"
 
 	# edge without property
@@ -311,9 +331,21 @@ def proc_dump(ls):
 		vnum2=m1.group(3)
 		vertex1=vertex_hash.get(int(vnum1))
 		vertex2=vertex_hash.get(int(vnum2))
-		vertex1_label, vertex1_prop = vertex1.split("\t")
-		vertex2_label, vertex2_prop = vertex2.split("\t")
-		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1 ", ls)
+		vertex1_label=""
+		vertex1_prop=""
+		vertex2_label=""
+		vertex2_prop=""
+		if vertex1:
+			vertex1_label, vertex1_prop = vertex1.split("\t")
+		else:
+			s_str = multiple_vlabels_dump.get(int(vnum1))
+			vertex1_label, vertex1_prop = s_str.split("\t")
+		if vertex2:
+			vertex2_label, vertex2_prop = vertex2.split("\t")
+		else:
+			s_str = multiple_vlabels_dump.get(int(vnum2))
+			vertex2_label, vertex2_prop = s_str.split("\t")
+		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1", elabel)
 		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + "]->(n2);"
 
 	if not mlabel_ls == "":
@@ -330,7 +362,7 @@ def make_graph_st(graph_name):
 	return "DROP GRAPH IF EXISTS "+graph_name+" CASCADE;\nCREATE GRAPH "+graph_name+";\nSET GRAPH_PATH="+graph_name+";"
 
 def out(ls):
-	global use_agens
+	global use_agens, use_dump
 	line=""
 	m1 = re.search(r'^\s*$', ls)
 	if ls == "" or m1:
