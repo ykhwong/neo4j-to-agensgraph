@@ -1,7 +1,7 @@
 # DB Migration from Neo4j to AgensGraph
 
 ## INTRODUCTION
-Preprocesses the Cypher statements from Neo4j so that they can be used for AgensGraph. This can be useful for the migration.
+Preprocesses the Cypher statements from Neo4j so that they can be used for AgensGraph. This can be useful for the migration. There are couple of export options. Please refer to the EXPORT CYPHER and DUMP OPTION sections.
 
 ## REQUIREMENT
 * Neo4j as a source database server
@@ -208,9 +208,7 @@ Please note that the existing graph repository named TEMP will be removed and in
 3. Please keep watching the export status from Neo4j.
 
 ## DUMP OPTION
-NOTE: This is optional, therefore you don't have to follow this method. Also, it does not currently support the multi-labels.
-
-Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them.
+Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them. Also, the preprocessor currently does not handle the multi labels yet.
 
 1. Check the existing indexes and constraints.
 ```sh
