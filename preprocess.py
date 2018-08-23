@@ -21,9 +21,9 @@ last_uii_begin_number=""
 def set_multiple_vlabel(vertexes, s_property):
 	global multiple_vlabel_cnt, multiple_vlabels
 	top_vertex="AG_MULV_"
-	multiple_vlabel_cnt=multiple_vlabel_cnt + 1
+	multiple_vlabel_cnt=int(multiple_vlabel_cnt) + 1
 	top_vertex = top_vertex + str(multiple_vlabel_cnt)
-	multiple_vlabels[vertexes] = top_vertex + "\t" + s_property
+	multiple_vlabels[vertexes] = str(top_vertex) + "\t" + str(s_property)
 	return top_vertex
 
 def set_last_uii(s_id):
@@ -66,7 +66,7 @@ def proc(ls):
 		s_property = m1.group(2)
 		if not re.search(UIL + r" +\{(.+)," + UII, ls):
 			last_uii = int(last_uii) + 1
-			implicit_uii[int(last_uii)] = vlabel + "\t" + s_property
+			implicit_uii[int(last_uii)] = str(vlabel) + "\t" + str(s_property)
 
 	st = r"CREATE +\(:'(\S+)':"+UIL+" +\{"+UII+":(\d+)\}\);"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
@@ -76,10 +76,10 @@ def proc(ls):
 		set_last_uii(s_id)
 		if re.search("':'", vlabel):
 			vlabel = re.sub("':'", ":", vlabel)
-			vlabel = set_multiple_vlabel(vlabel, "")
-			unique_import_id[s_id] = vlabel + "\t"
+			vlabel = set_multiple_vlabel(str(vlabel), "")
+			unique_import_id[s_id] = str(vlabel) + "\t"
 			return ""
-		unique_import_id[s_id] = vlabel + "\t"
+		unique_import_id[s_id] = str(vlabel) + "\t"
 		ls = re.sub(r":" + UIL + " +.+", ");", ls)
 
 	st = r"CREATE +\(:'(\S+)':" + UIL + r" +\{(.+), " + UII + r':(\d+)\}\);'
@@ -92,10 +92,10 @@ def proc(ls):
 		if re.search("':'", vlabel):
 			vlabel = re.sub("':'", ":", vlabel)
 			vlabel = set_multiple_vlabel(vlabel, keyval)
-			unique_import_id[s_id] = vlabel + "\t" + keyval
+			unique_import_id[s_id] = str(vlabel) + "\t" + str(keyval)
 			return ""
-		unique_import_id[s_id] = vlabel + "\t" + keyval
-		ls = re.sub(r"^CREATE +\(:'(\S+)':" + UIL + r" +\{", 'CREATE (:' + vlabel + ' {', ls, flags=re.IGNORECASE) 
+		unique_import_id[s_id] = str(vlabel) + "\t" + str(keyval)
+		ls = re.sub(r"^CREATE +\(:'(\S+)':" + UIL + r" +\{", 'CREATE (:' + str(vlabel) + ' {', ls, flags=re.IGNORECASE) 
 		ls = re.sub(r", +" + UII + r":\d+\}", "}", ls)
 
 	if (re.search(r"^COMMIT", ls, re.IGNORECASE) and multiple_vlabels):
@@ -109,15 +109,15 @@ def proc(ls):
 			prev=""
 			for vlabel in key.split(":"):
 				if re.search("\S", s_property):
-					ls = ls + "CREATE (:" + vlabel + " { " + s_property + " });\n"
+					ls = ls + "CREATE (:" + str(vlabel) + " { " + str(s_property) + " });\n"
 				else:
 					if prev != vlabel:
-						ls = ls + "CREATE VLABEL " + vlabel + ";\n"
+						ls = ls + "CREATE VLABEL " + str(vlabel) + ";\n"
 				prev = vlabel
 
-			ls = ls + "CREATE VLABEL " + val1 + " INHERITS ("
+			ls = ls + "CREATE VLABEL " + str(val1) + " INHERITS ("
 			for vlabel in key.split(":"):
-				ls = ls + vlabel + ", "
+				ls = ls + str(vlabel) + ", "
 			ls = re.sub(r", $", "", ls)
 			ls = ls + ");\n"
 
@@ -189,13 +189,13 @@ def proc(ls):
 	if m1:
 		val = m1.group(1)
 		val = re.sub(r"'$", "", val)
-		ls = re.sub(r"^MATCH +\(n1:'*(\S+)'*\s*\{", "MATCH (n1:" + val + " {", ls, flags=re.IGNORECASE)
+		ls = re.sub(r"^MATCH +\(n1:'*(\S+)'*\s*\{", "MATCH (n1:" + str(val) + " {", ls, flags=re.IGNORECASE)
 		st = r" +\(n2:'*(\S+)'*\s*\{"
 		m2 = re.search(st, ls, flags=re.IGNORECASE)
 		if m2:
 			val = m2.group(1)
 			val = re.sub(r"'$", "", val)
-			ls = re.sub(r" +\(n2:'*(\S+)'*\s*\{", " (n2:" + val + " {", ls, flags=re.IGNORECASE)
+			ls = re.sub(r" +\(n2:'*(\S+)'*\s*\{", " (n2:" + str(val) + " {", ls, flags=re.IGNORECASE)
 		ls = re.sub(r"\[:'(\S+)'\]", r"[:\1]", ls, flags=re.IGNORECASE)
 		ls = re.sub(r"\[:'(\S+)' ", r"[:\1 ", ls, flags=re.IGNORECASE)
 
@@ -220,7 +220,6 @@ def proc_dump(ls):
 		vlabels = m1.group(2)
 		if re.search("':'", vlabels):
 			print("--Multiple labels not supported")
-			exit(1)
 
 	# vertex with multilabels (with property)
 	st = r"create +\(_(\d+):(\S+) +\{(\S+)\}\)"
@@ -231,21 +230,20 @@ def proc_dump(ls):
 		vprop = m1.group(3)
 		if re.search("':'", vlabels):
 			print("--Multiple labels not supported")
-			exit(1)
 
 	# vertex with property
 	st = r"^create +\(_(\d+):'(\S+)' +\{(.+)\}\)\s*$"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vertex_hash[int(m1.group(1))] = str(m1.group(2)) + "\t" + str(m1.group(3))
-		ls = "CREATE (:" + m1.group(2) + " {" + m1.group(3) + "});"
+		ls = "CREATE (:" + str(m1.group(2)) + " {" + str(m1.group(3)) + "});"
 
 	# vertex without property
 	st = r"^create +\(_(\d+):'(\S+)'\)\s*$"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vertex_hash[int(m1.group(1))] = str(m1.group(2)) + "\t"
-		ls = "CREATE (:" + m1.group(2) + ");"
+		ls = "CREATE (:" + str(m1.group(2)) + ");"
 
 	# edge with property
 	st = r"^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_\d+\)\s*$"
@@ -259,7 +257,7 @@ def proc_dump(ls):
 		vertex2=vertex_hash.get(int(vnum2))
 		vertex1_label, vertex1_prop = vertex1.split("\t")
 		vertex2_label, vertex2_prop = vertex2.split("\t")
-		ls = "MATCH (n1:" + vertex1_label + " {" + vertex1_prop + "}), (n2:" + vertex2_label + " {" + vertex2_prop + "}) CREATE (n1)-[:" + elabel + " {" + eprop + "}]->(n2);"
+		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + " {" + str(eprop) + "}]->(n2);"
 
 	# edge without property
 	st = r"^create +\(_(\d+)\)-\[:(\S+)\]->\(_(\d+)\)"
@@ -267,12 +265,12 @@ def proc_dump(ls):
 	if m1:
 		vnum1=m1.group(1)
 		elabel=m1.group(2)
-		vnum2=m1.group(4)
+		vnum2=m1.group(3)
 		vertex1=vertex_hash.get(int(vnum1))
 		vertex2=vertex_hash.get(int(vnum2))
 		vertex1_label, vertex1_prop = vertex1.split("\t")
 		vertex2_label, vertex2_prop = vertex2.split("\t")
-		ls = "MATCH (n1:" + vertex1_label + " {" + vertex1_prop + "}), (n2:" + vertex2_label + " {" + vertex2_prop + "}) CREATE (n1)-[:" + elabel + "]->(n2);"
+		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + "]->(n2);"
 
 	return ls
 

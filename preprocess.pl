@@ -220,7 +220,6 @@ sub proc_dump {
 		my $vlabels = $2;
 		if ($vlabels =~ /':'/) {
 			printf("--Multiple labels not supported\n");
-			exit 1;
 		}
 	}
 
@@ -231,7 +230,6 @@ sub proc_dump {
 		my $vprop = $3;
 		if ($vlabels =~ /':'/) {
 			printf("--Multiple labels not supported\n");
-			exit 1;
 		}
 	}
 
