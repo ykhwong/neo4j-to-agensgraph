@@ -106,8 +106,7 @@ def proc(ls):
 	if re.search(r"^SCHEMA +AWAIT", ls, re.IGNORECASE):
 		if multiple_vlabels:
 			ls = "BEGIN;\n"
-
-			for key in sorted(multiple_vlabels.keys.iterkeys()):
+			for key in sorted(multiple_vlabels):
 				val = multiple_vlabels.get(key)
 				val1, s_property = val.split("\t")
 				prev=""
@@ -260,7 +259,7 @@ def proc_dump(ls):
 	st = r"^create +\(_\d+\)-"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if multiple_vlabels:
-		for key in sorted(multiple_vlabels.iterkeys()):
+		for key in sorted(multiple_vlabels):
 			val = multiple_vlabels.get(key)
 			val1, s_property = val.split("\t")
 			prev=""
