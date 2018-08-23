@@ -304,13 +304,15 @@ Please note that the existing graph repository named TEMP will be removed and in
 7. If it takes too long time for the dump, then you can use this command during the export. Don't forget to use "--use-dump" option.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
-  $ tail -f -n +1 export.cypher | perl preprocess.pl --graph=TEMP --import-to-agens --use-dump
+  $ echo dump>dump.txt
+  $ ./bin/neo4j-shell -file dump.txt | perl preprocess.pl --graph=TEMP --import-to-agens --use-dump
 ```
 
 Or you can use the python interpreter instead.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
-  $ tail -f -n +1 export.cypher | python preprocess.py --graph=TEMP --import-to-agens --use-dump
+  $ echo dump>dump.txt
+  $ ./bin/neo4j-shell -file dump.txt | python preprocess.py --graph=TEMP --import-to-agens --use-dump
 ```
 
 
