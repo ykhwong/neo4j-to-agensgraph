@@ -279,13 +279,13 @@ CREATE (:service {'name':'SAN'});
 CREATE (:service {'name':'Public Website'});
 CREATE (:service {'name':'Webserver VM'});
 CREATE (:service {'name':'CRM'});
-MATCH (n1:service {'name':'Database VM'}), (n2:service {'name':'Server 2'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'Server 1'}), (n2:service {'name':'SAN'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'Server 2'}), (n2:service {'name':'SAN'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'Public Website'}), (n2:service {'name':'Webserver VM'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'Public Website'}), (n2:service {'name':'Database VM'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'Webserver VM'}), (n2:service {'name':'Server 1'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
-MATCH (n1:service {'name':'CRM'}), (n2:service {'name':'Database VM'}) CREATE (n1)-[:'DEPENDS_ON']->(n2);
+MATCH (n1:service {'name':'Database VM'}), (n2:service {'name':'Server 2'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'Server 1'}), (n2:service {'name':'SAN'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'Server 2'}), (n2:service {'name':'SAN'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'Public Website'}), (n2:service {'name':'Webserver VM'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'Public Website'}), (n2:service {'name':'Database VM'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'Webserver VM'}), (n2:service {'name':'Server 1'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
+MATCH (n1:service {'name':'CRM'}), (n2:service {'name':'Database VM'}) CREATE (n1)-[:DEPENDS_ON]->(n2);
 COMMIT;
 ```
 
