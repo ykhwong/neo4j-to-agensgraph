@@ -46,7 +46,6 @@ sub set_last_uii {
 
 sub proc {
 	my $ls = shift;
-	return "" if ($ls =~ /^SCHEMA +AWAIT/i);
 	return "" if ($ls =~ /^(CREATE|DROP) +CONSTRAINT .+UNIQUE +IMPORT/i);
 	return "" if ($ls =~ /^MATCH .+ REMOVE .+/i);
 
@@ -96,34 +95,36 @@ sub proc {
 		$ls =~ s/, +$UII:\d+\}/\}/i;
 	}
 
-	if ($ls =~ /^COMMIT/i && %multiple_vlabels) {
-		$ls .= "\nBEGIN;\n";
-		foreach my $key (sort keys %multiple_vlabels) {
-			my $val = $multiple_vlabels{$key};
-			my ($val1, $property) = (split /\t/, $val);
-			my $prev;
+	if ($ls =~ /^SCHEMA +AWAIT/i) {
+		if (%multiple_vlabels) {
+			$ls = "BEGIN;\n";
+			foreach my $key (sort keys %multiple_vlabels) {
+				my $val = $multiple_vlabels{$key};
+				my ($val1, $property) = (split /\t/, $val);
+				my $prev;
 
-			foreach my $vlabel (sort split /:/, $key) {
-				if ($property =~ /\S/) {
-					$ls .= "CREATE (:$vlabel { $property });\n";
-				} else {
-					if ($prev ne $vlabel) {
-						$ls .= "CREATE VLABEL $vlabel;\n";
+				foreach my $vlabel (sort split /:/, $key) {
+					if ($property =~ /\S/) {
+						$ls .= "CREATE (:$vlabel { $property });\n";
+					} else {
+						if ($prev ne $vlabel) {
+							$ls .= "CREATE VLABEL $vlabel;\n";
+						}
 					}
+					$prev = $vlabel;
 				}
-				$prev = $vlabel;
+				$ls .= "CREATE VLABEL $val1 INHERITS (";
+				foreach my $vlabel (sort split /:/, $key) {
+					$ls .= "$vlabel, ";
+				}
+				$ls =~ s/, $//;
+				$ls .= ");\n";
 			}
-			$ls .= "CREATE VLABEL $val1 INHERITS (";
-			foreach my $vlabel (sort split /:/, $key) {
-				$ls .= "$vlabel, ";
-			}
-			$ls =~ s/, $//;
-			$ls .= ");\n";
-
-
+			$ls .= "COMMIT;\n";
+			undef %multiple_vlabels;
+		} else {
+			return "";
 		}
-		$ls .= "COMMIT;\n";
-		undef %multiple_vlabels;
 	}
 
 	if ($ls =~ /^MATCH +\(n1:$UIL(\{$UII:\d+\})\), +\(n2:$UIL(\{$UII:\d+\})\)/i) {
@@ -206,6 +207,7 @@ sub proc {
 
 sub proc_dump {
 	my $ls = shift;
+	my $mlabel_ls;
 	return unless ($ls =~ /^\s*(begin|commit|create )/i);
 	$ls =~ s/'/''/g;
 	$ls =~ s/\\"([\},])/\\\\'$1/g;
@@ -219,17 +221,61 @@ sub proc_dump {
 		my $vnum = $1;
 		my $vlabels = $2;
 		if ($vlabels =~ /':'/) {
-			printf("--Multiple labels not supported\n");
+			$vlabels =~ s/^'(.+)'$/$1/;
+			my @lbls = sort (split /':'/, $vlabels);
+			my $vertexes;
+			foreach my $item (@lbls) {
+				$vertexes .= $item . ":";
+			}
+			$vertexes =~ s/:$//;
+			set_multiple_vlabel($vertexes, "");
+			return "";
 		}
 	}
 
 	# vertex with multilabels (with property)
-	if ($ls =~ /^create +\(_(\d+):(\S+) +\{(\S+)\}\)/i) {
+	if ($ls =~ /^create +\(_(\d+):(\S+) +\{(.+)\}\)/i) {
 		my $vnum = $1;
 		my $vlabels = $2;
 		my $vprop = $3;
 		if ($vlabels =~ /':'/) {
-			printf("--Multiple labels not supported\n");
+			$vlabels =~ s/^'(.+)'$/$1/;
+			my @lbls = sort (split /':'/, $vlabels);
+			my $vertexes;
+			foreach my $item (@lbls) {
+				$vertexes .= $item . ":";
+			}
+			$vertexes =~ s/:$//;
+			set_multiple_vlabel($vertexes, $vprop);
+			return "";
+		}
+	}
+
+	if ($ls =~ /^create +\(_\d+\)-/i) {
+		if (%multiple_vlabels) {
+			foreach my $key (sort keys %multiple_vlabels) {
+				my $val = $multiple_vlabels{$key};
+				my ($val1, $property) = (split /\t/, $val);
+				my $prev;
+
+				foreach my $vlabel (sort split /:/, $key) {
+					if ($property =~ /\S/) {
+						$mlabel_ls .= "CREATE (:$vlabel { $property });\n";
+					} else {
+						if ($prev ne $vlabel) {
+							$mlabel_ls .= "CREATE VLABEL $vlabel;\n";
+						}
+					}
+					$prev = $vlabel;
+				}
+				$mlabel_ls .= "CREATE VLABEL $val1 INHERITS (";
+				foreach my $vlabel (sort split /:/, $key) {
+					$mlabel_ls .= "$vlabel, ";
+				}
+				$mlabel_ls =~ s/, $//;
+				$mlabel_ls .= ");\n";
+			}
+			undef %multiple_vlabels;
 		}
 	}
 
@@ -245,7 +291,7 @@ sub proc_dump {
 	}
 
 	# edge with property
-	if ($ls =~ /^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_\d+\)\s*$/i) {
+	if ($ls =~ /^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_(\d+)\)\s*$/i) {
 		my $vnum1=$1;
 		my $elabel=$2;
 		my $eprop=$3;
@@ -273,6 +319,9 @@ sub proc_dump {
 	}
 
 	$ls =~ s/\s*$//;
+	if ($mlabel_ls) {
+		$ls = $mlabel_ls . $ls;
+	}
 	return $ls;
 }
 

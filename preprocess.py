@@ -43,9 +43,6 @@ def set_last_uii(s_id):
 
 def proc(ls):
 	global multiple_vlabels, last_uii, implicit_uii
-	if re.search('^SCHEMA +AWAIT', ls, flags=re.IGNORECASE):
-		return ""
-
 	if re.search('^(CREATE|DROP) +CONSTRAINT .+UNIQUE +IMPORT', ls, flags=re.IGNORECASE):
 		return ""
 
@@ -91,38 +88,39 @@ def proc(ls):
 		set_last_uii(s_id)
 		if re.search("':'", vlabel):
 			vlabel = re.sub("':'", ":", vlabel)
-			vlabel = set_multiple_vlabel(vlabel, keyval)
+			vlabel = set_multiple_vlabel(str(vlabel), keyval)
 			unique_import_id[s_id] = str(vlabel) + "\t" + str(keyval)
 			return ""
 		unique_import_id[s_id] = str(vlabel) + "\t" + str(keyval)
 		ls = re.sub(r"^CREATE +\(:'(\S+)':" + UIL + r" +\{", 'CREATE (:' + str(vlabel) + ' {', ls, flags=re.IGNORECASE) 
 		ls = re.sub(r", +" + UII + r":\d+\}", "}", ls)
 
-	if (re.search(r"^COMMIT", ls, re.IGNORECASE) and multiple_vlabels):
-		if not re.search("(\r|\n)$", ls):
-			ls = ls + "\n"
-		ls = ls + "BEGIN;\n"
+	if re.search(r"^SCHEMA +AWAIT", ls, re.IGNORECASE):
+		if multiple_vlabels:
+			ls = "BEGIN;\n"
 
-		for key in multiple_vlabels:
-			val = multiple_vlabels.get(key)
-			val1, s_property = val.split("\t")
-			prev=""
-			for vlabel in key.split(":"):
-				if re.search("\S", s_property):
-					ls = ls + "CREATE (:" + str(vlabel) + " { " + str(s_property) + " });\n"
-				else:
-					if prev != vlabel:
-						ls = ls + "CREATE VLABEL " + str(vlabel) + ";\n"
-				prev = vlabel
+			for key in multiple_vlabels:
+				val = multiple_vlabels.get(key)
+				val1, s_property = val.split("\t")
+				prev=""
+				for vlabel in key.split(":"):
+					if re.search("\S", s_property):
+						ls = ls + "CREATE (:" + str(vlabel) + " { " + str(s_property) + " });\n"
+					else:
+						if prev != vlabel:
+							ls = ls + "CREATE VLABEL " + str(vlabel) + ";\n"
+					prev = vlabel
 
-			ls = ls + "CREATE VLABEL " + str(val1) + " INHERITS ("
-			for vlabel in key.split(":"):
-				ls = ls + str(vlabel) + ", "
-			ls = re.sub(r", $", "", ls)
-			ls = ls + ");\n"
+				ls = ls + "CREATE VLABEL " + str(val1) + " INHERITS ("
+				for vlabel in key.split(":"):
+					ls = ls + str(vlabel) + ", "
+				ls = re.sub(r", $", "", ls)
+				ls = ls + ");\n"
 
-		ls = ls + "COMMIT;\n"
-		multiple_vlabels = {}
+			ls = ls + "COMMIT;\n"
+			multiple_vlabels = {}
+		else:
+			return ""
 
 	st = r"^(?i)MATCH +\(n1:" + UIL + r"(\{" + UII + ":\d+\})\), +\(n2:" + UIL + "({" + UII + ":\d+\})\)"
 	m1 = re.search(st, ls, re.IGNORECASE)
@@ -202,6 +200,8 @@ def proc(ls):
 	return ls
 
 def proc_dump(ls):
+	global multiple_vlabels
+	mlabel_ls=""
 	if not re.search('^\s*(begin|commit|create )', ls, flags=re.IGNORECASE):
 		return ""
 
@@ -219,17 +219,59 @@ def proc_dump(ls):
 		vnum = m1.group(1)
 		vlabels = m1.group(2)
 		if re.search("':'", vlabels):
-			print("--Multiple labels not supported")
+			vlabels = re.sub(r"^'", "", vlabels)
+			vlabels = re.sub(r"'$", "", vlabels)
+			lbls = vlabels.split("':'")
+			lbls.sort
+			vertexes=""
+			for item in lbls:
+				vertexes = vertexes + str(item) + ":"
+			vertexes = re.sub(":$", "", vertexes)
+			set_multiple_vlabel(str(vertexes), "")
+			return ""
 
 	# vertex with multilabels (with property)
-	st = r"create +\(_(\d+):(\S+) +\{(\S+)\}\)"
+	st = r"create +\(_(\d+):(\S+) +\{(.+)\}\)"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vnum = m1.group(1)
 		vlabels = m1.group(2)
 		vprop = m1.group(3)
 		if re.search("':'", vlabels):
-			print("--Multiple labels not supported")
+			vlabels = re.sub(r"^'", "", vlabels)
+			vlabels = re.sub(r"'$", "", vlabels)
+			lbls = vlabels.split("':'")
+			lbls.sort
+			vertexes=""
+			for item in lbls:
+				vertexes = vertexes + str(item) + ":"
+			vertexes = re.sub(":$", "", vertexes)
+			set_multiple_vlabel(str(vertexes), vprop)
+			return ""
+
+	st = r"^create +\(_\d+\)-"
+	m1 = re.search(st, ls, flags=re.IGNORECASE)
+	if multiple_vlabels:
+		for key in multiple_vlabels:
+			val = multiple_vlabels.get(key)
+			val1, s_property = val.split("\t")
+			prev=""
+			for vlabel in key.split(":"):
+				if re.search("\S", s_property):
+					mlabel_ls = mlabel_ls + "CREATE (:" + str(vlabel) + " { " + str(s_property) + " });\n"
+				else:
+					if prev != vlabel:
+						mlabel_ls = mlabel_ls + "CREATE VLABEL " + str(vlabel) + ";\n"
+				prev = vlabel
+
+			mlabel_ls = mlabel_ls + "CREATE VLABEL " + str(val1) + " INHERITS ("
+			for vlabel in key.split(":"):
+				mlabel_ls = mlabel_ls + str(vlabel) + ", "
+			mlabel_ls = re.sub(r", $", "", mlabel_ls)
+			mlabel_ls = mlabel_ls + ");\n"
+
+		multiple_vlabels = {}
+
 
 	# vertex with property
 	st = r"^create +\(_(\d+):'(\S+)' +\{(.+)\}\)\s*$"
@@ -246,7 +288,7 @@ def proc_dump(ls):
 		ls = "CREATE (:" + str(m1.group(2)) + ");"
 
 	# edge with property
-	st = r"^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_\d+\)\s*$"
+	st = r"^create +\(_(\d+)\)-\[:(\S+) +\{(.+)\}\]->\(_(\d+)\)\s*$"
 	m1 = re.search(st, ls, flags=re.IGNORECASE)
 	if m1:
 		vnum1=m1.group(1)
@@ -274,6 +316,8 @@ def proc_dump(ls):
 		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1 ", ls)
 		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + "]->(n2);"
 
+	if not mlabel_ls == "":
+		ls = mlabel_ls + ls
 	return ls
 
 def load_file(filename):
