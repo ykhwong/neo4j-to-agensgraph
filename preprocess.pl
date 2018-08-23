@@ -254,6 +254,7 @@ sub proc_dump {
 		my $vertex2 = $vertex_hash{$vnum2};
 		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
 		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		$elabel =~ s/^\s*'(.+)'\s*$/$1/;
 		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel {$eprop}]->(n2);";
 	}
 
@@ -266,6 +267,7 @@ sub proc_dump {
 		my $vertex2 = $vertex_hash{$vnum2};
 		my ($vertex1_label, $vertex1_prop) = (split /\t/, $vertex1);
 		my ($vertex2_label, $vertex2_prop) = (split /\t/, $vertex2);
+		$elabel =~ s/^\s*'(.+)'\s*$/$1/;
 		$ls = "MATCH (n1:$vertex1_label {$vertex1_prop}), (n2:$vertex2_label {$vertex2_prop}) CREATE (n1)-[:$elabel]->(n2);";
 
 	}

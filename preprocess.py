@@ -257,6 +257,7 @@ def proc_dump(ls):
 		vertex2=vertex_hash.get(int(vnum2))
 		vertex1_label, vertex1_prop = vertex1.split("\t")
 		vertex2_label, vertex2_prop = vertex2.split("\t")
+		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1 ", ls)
 		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + " {" + str(eprop) + "}]->(n2);"
 
 	# edge without property
@@ -270,6 +271,7 @@ def proc_dump(ls):
 		vertex2=vertex_hash.get(int(vnum2))
 		vertex1_label, vertex1_prop = vertex1.split("\t")
 		vertex2_label, vertex2_prop = vertex2.split("\t")
+		elabel=re.sub(r"^\s*'(.+)'\s*$", r"\1 ", ls)
 		ls = "MATCH (n1:" + str(vertex1_label) + " {" + str(vertex1_prop) + "}), (n2:" + str(vertex2_label) + " {" + str(vertex2_prop) + "}) CREATE (n1)-[:" + str(elabel) + "]->(n2);"
 
 	return ls
