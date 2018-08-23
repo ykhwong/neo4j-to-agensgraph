@@ -214,7 +214,8 @@ Besides the export-cypher method above, Neo4j's dump also can be used for the ex
 
 1. Check the existing indexes and constraints.
 ```sh
-  $ neo4j-shell
+  $ cd /path/to/neo4j-community-3.4.5
+  $ ./bin/neo4j-shell
   neo4j-sh (?)$ CALL db.indexes();
   neo4j-sh (?)$ CALL db.constraints();
 ```
@@ -225,8 +226,9 @@ Besides the export-cypher method above, Neo4j's dump also can be used for the ex
 
 3. Create a file that includes "dump" and run it with neo4j-shell. "neo4j-shell -c dump" also can be used but may not work properly in some systems.
 ```sh
+  $ cd /path/to/neo4j-community-3.4.5
   $ echo dump>dump.txt
-  $ neo4j-shell -file dump.txt>export.cypher
+  $ ./bin/neo4j-shell -file dump.txt>export.cypher
 ```
 
 4. export.cypher file will be created. The contents of the file would be something like this:
