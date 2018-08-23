@@ -208,7 +208,7 @@ Please note that the existing graph repository named TEMP will be removed and in
 3. Please keep watching the export status from Neo4j.
 
 ## DUMP OPTION
-Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them. Also, the preprocessor currently does not handle the multi labels yet with dump option enabled.
+Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them.
 
 1. Check the existing indexes and constraints.
 ```sh
@@ -389,7 +389,6 @@ Please run this Cypher query statement. If the returned value is bigger than 1, 
 * '--graph=GRAPH_NAME' option cannot be omitted because every graph-related elements including vertices and edges must be stored in the repository.
 * '--import-to-agens' option depends on the AgensGraph command line interface tool(agens). Connection-related options will be all forwarded to the interface.
 * Multiple labels from Neo4j are automatically converted to the label inheritances in AgensGraph due to the architectural differences between the two databases. The parent vertex labels that start with "AG_MULV_(number)" will be created in the target side.
-* Do not use '--use-dump' option for the multiple labels. For details, please refer to the DUMP OPTION section.
 
 ### USAGE
 ```
