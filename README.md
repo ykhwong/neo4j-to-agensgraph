@@ -210,6 +210,7 @@ Please note that the existing graph repository named TEMP will be removed and in
 ## DUMP OPTION
 Besides the export-cypher method above, Neo4j's dump also can be used for the export to AgensGraph. However, you may have to drop the existing constraints because Neo4j complains about them.
 
+### DROP ALL CONSTRAINTS
 1. Check the existing indexes and constraints.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
@@ -222,14 +223,15 @@ Besides the export-cypher method above, Neo4j's dump also can be used for the ex
 * DROP INDEX: https://neo4j.com/docs/developer-manual/current/cypher/schema/index/
 * DROP CONSTRAINT: https://neo4j.com/docs/developer-manual/current/cypher/schema/constraints/#constraints-drop-unique-constraint
 
-3. Create a file that includes "dump" and run it with neo4j-shell. "neo4j-shell -c dump" also can be used but may not work properly in some systems.
+### FOR THE SMALL DATA SET
+1. Create a file that includes "dump" and run it with neo4j-shell. "neo4j-shell -c dump" also can be used but may not work properly in some systems.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
   $ echo dump>dump.txt
   $ ./bin/neo4j-shell -file dump.txt>export.cypher
 ```
 
-4. export.cypher file will be created. The contents of the file would be something like this:
+2. export.cypher file will be created. The contents of the file would be something like this:
 ```
 begin
 commit
@@ -252,7 +254,7 @@ create (_18822)-[:`DEPENDS_ON`]->(_18779)
 commit
 ```
 
-5. Run the below command to begin the preprocess. Don't forget to use "--use-dump" option.
+3. Run the below command to begin the preprocess. Don't forget to use "--use-dump" option.
 ```sh
   $ perl preprocess.pl export.cypher --graph=TEMP --use-dump
 ```
@@ -289,7 +291,7 @@ MATCH (n1:service {'name':'CRM'}), (n2:service {'name':'Database VM'}) CREATE (n
 COMMIT;
 ```
 
-6. If you want to import the preprocessed result to AgensGraph, please type the following. Don't forget to use "--use-dump" option.
+4. If you want to import the preprocessed result to AgensGraph, please type the following. Don't forget to use "--use-dump" option.
 ```sh
   $ perl preprocess.pl export.cypher --graph=TEMP --import-to-agens --use-dump
 ```
@@ -301,7 +303,9 @@ Or you can use the python interpreter instead.
 
 Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
 
-7. If it takes too long time for the dump, then you can use this command during the export. Don't forget to use "--use-dump" option.
+### FOR THE BIG DATA SET
+
+1. If it takes too long time for the dump, then you can use this command during the export. Don't forget to use "--use-dump" option.
 ```sh
   $ cd /path/to/neo4j-community-3.4.5
   $ echo dump>dump.txt
@@ -315,6 +319,7 @@ Or you can use the python interpreter instead.
   $ ./bin/neo4j-shell -file dump.txt | python preprocess.py --graph=TEMP --import-to-agens --use-dump
 ```
 
+Please note that the existing graph repository named TEMP will be removed and initialized. You can freely change the graph name above.
 
 ## GET SCHEMA INFO
 ### NEO4J
